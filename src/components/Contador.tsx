@@ -109,19 +109,30 @@ export default function Contador() {
         <strong className="font-semibold text-verde-700">10.000 horas</strong>
         </span>
       </p>
-      <div className="mx-auto mt-2 flex max-w-md items-center gap-3">
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-verde-200">
+      <div className="mx-auto mt-2.5 max-w-lg">
+        <div className="relative">
           <div
-            className="h-full rounded-full bg-verde-600 transition-all duration-700"
-            style={{ width: `${pct}%` }}
+            className="h-2.5 w-full overflow-hidden rounded-full border border-verde-200 bg-verde-100"
             role="progressbar"
             aria-valuenow={Math.round(pct * 10) / 10}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label="Progresso em direção à meta de 10.000 horas"
-          />
+          >
+            <div
+              className="h-full rounded-full bg-verde-600 transition-all duration-700"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          {/* marcador de meta */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex flex-col items-center">
+            <div className="h-full w-px bg-verde-500/60" />
+          </div>
         </div>
-        <span className="flex-shrink-0 text-xs tabular-nums text-verde-800/70">{pctTexto}</span>
+        <div className="mt-1 flex justify-between text-xs tabular-nums text-verde-800/60">
+          <span>{pctTexto} concluído</span>
+          <span>10.000h</span>
+        </div>
       </div>
     </div>
   );
