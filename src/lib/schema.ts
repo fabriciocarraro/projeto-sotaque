@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   AMBIENTES,
   DISPOSITIVOS,
+  ESCOLARIDADES,
   ESTADOS,
   FAIXAS_ETARIAS,
   GENEROS,
@@ -40,6 +41,7 @@ export const submissaoSchema = z.object({
 
   faixa_etaria: z.enum(valoresDe(FAIXAS_ETARIAS)),
   genero: z.preprocess(vazioParaUndefined, z.enum(valoresDe(GENEROS)).optional()),
+  escolaridade: z.preprocess(vazioParaUndefined, z.enum(valoresDe(ESCOLARIDADES)).optional()),
 
   tipo_dispositivo: z.preprocess(vazioParaUndefined, z.enum(valoresDe(DISPOSITIVOS)).optional()),
   tipo_microfone: z.preprocess(vazioParaUndefined, z.enum(valoresDe(MICROFONES)).optional()),
@@ -64,6 +66,10 @@ export const submissaoSchema = z.object({
         sotaque: z.preprocess(
           vazioParaUndefined,
           z.enum(valoresDe(SOTAQUES)).optional(),
+        ),
+        escolaridade: z.preprocess(
+          vazioParaUndefined,
+          z.enum(valoresDe(ESCOLARIDADES)).optional(),
         ),
       }),
     )

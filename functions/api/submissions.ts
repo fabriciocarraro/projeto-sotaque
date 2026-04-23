@@ -128,10 +128,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     const stmtSubmission = env.DB.prepare(
       `INSERT INTO submissions (
         id, pseudonimo, sotaque_declarado, regiao_socializacao, estado_principal,
-        cidade_microrregiao, faixa_etaria, genero, tipo_dispositivo, tipo_microfone,
+        cidade_microrregiao, faixa_etaria, genero, escolaridade, tipo_dispositivo, tipo_microfone,
         ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
         audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes, status_moderacao, criado_em
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?)`,
     ).bind(
       id,
       dados.pseudonimo,
@@ -141,6 +141,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       dados.cidade_microrregiao ?? null,
       dados.faixa_etaria,
       dados.genero ?? null,
+      dados.escolaridade ?? null,
       dados.tipo_dispositivo ?? null,
       dados.tipo_microfone ?? null,
       dados.ambiente_gravacao ?? null,
@@ -174,9 +175,9 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       .slice(1)
       .map((f, i) =>
         env.DB.prepare(
-          `INSERT INTO submission_speakers (submission_id, speaker_index, sotaque)
-           VALUES (?, ?, ?)`,
-        ).bind(id, i + 2, f.sotaque ?? null),
+          `INSERT INTO submission_speakers (submission_id, speaker_index, sotaque, escolaridade)
+           VALUES (?, ?, ?, ?)`,
+        ).bind(id, i + 2, f.sotaque ?? null, f.escolaridade ?? null),
       );
 
     await env.DB.batch([stmtSubmission, stmtConsent, ...stmtsSpeakers]);

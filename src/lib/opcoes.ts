@@ -98,6 +98,13 @@ export const AMBIENTES = [
   { valor: "ruido-alto", rotulo: "Ruído alto" },
 ] as const;
 
+export const ESCOLARIDADES = [
+  { valor: "fundamental-1", rotulo: "Ensino Fundamental I (até 5º ano)" },
+  { valor: "fundamental-2-medio", rotulo: "Ensino Fundamental II / Ensino Médio" },
+  { valor: "superior", rotulo: "Ensino Superior (completo ou incompleto)" },
+  { valor: "prefiro-nao-informar", rotulo: "Prefiro não informar" },
+] as const;
+
 export const QUALIDADE = [1, 2, 3, 4, 5] as const;
 
 export const MIMETYPES_PERMITIDOS = [

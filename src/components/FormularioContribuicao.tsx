@@ -4,6 +4,7 @@ import {
   AMBIENTES,
   AUDIO_TAMANHO_MAX,
   DISPOSITIVOS,
+  ESCOLARIDADES,
   ESTADOS,
   EXTENSOES_PERMITIDAS,
   FAIXAS_ETARIAS,
@@ -129,6 +130,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
 
   const [faixaEtaria, setFaixaEtaria] = useState("");
   const [genero, setGenero] = useState("");
+  const [escolaridade, setEscolaridade] = useState("");
 
   const [dispositivo, setDispositivo] = useState("");
   const [microfone, setMicrofone] = useState("");
@@ -137,6 +139,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
 
   const [numFalantes, setNumFalantes] = useState(1);
   const [sotaquesFalantes, setSotaquesFalantes] = useState<string[]>(["", "", "", ""]);
+  const [escolaridadesFalantes, setEscolaridadesFalantes] = useState<string[]>(["", "", "", ""]);
 
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [duracao, setDuracao] = useState<number | null>(null);
@@ -217,14 +220,18 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       cidade_microrregiao: cidade.trim() || undefined,
       faixa_etaria: faixaEtaria,
       genero: genero || undefined,
+      escolaridade: escolaridade || undefined,
       tipo_dispositivo: dispositivo || undefined,
       tipo_microfone: microfone || undefined,
       ambiente_gravacao: ambiente || undefined,
       autoavaliacao_qualidade: qualidade ? Number(qualidade) : undefined,
       audio_duracao_segundos: duracao ?? undefined,
       falantes: [
-        { sotaque: sotaque || undefined },
-        ...sotaquesFalantes.slice(0, numFalantes - 1).map((s) => ({ sotaque: s || undefined })),
+        { sotaque: sotaque || undefined, escolaridade: escolaridade || undefined },
+        ...sotaquesFalantes.slice(0, numFalantes - 1).map((s, i) => ({
+          sotaque: s || undefined,
+          escolaridade: escolaridadesFalantes[i] || undefined,
+        })),
       ],
       consentimento: consent,
       turnstileToken,
@@ -281,6 +288,14 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
 
   function setSotaqueFalante(idx: number, valor: string) {
     setSotaquesFalantes((prev) => {
+      const copia = [...prev];
+      copia[idx] = valor;
+      return copia;
+    });
+  }
+
+  function setEscolaridadeFalante(idx: number, valor: string) {
+    setEscolaridadesFalantes((prev) => {
       const copia = [...prev];
       copia[idx] = valor;
       return copia;
@@ -462,6 +477,25 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
             ))}
           </select>
         </Campo>
+
+        <Campo
+          id="escolaridade"
+          rotulo="Nível de escolaridade (máximo concluído ou em curso)"
+          ajuda="Opcional, autoidentificado."
+          erro={erros["escolaridade"]}
+        >
+          <select
+            id="escolaridade"
+            value={escolaridade}
+            onChange={(e) => setEscolaridade(e.target.value)}
+            className={inputClasse(!!erros["escolaridade"])}
+          >
+            <option value="">Prefiro não informar / em branco</option>
+            {ESCOLARIDADES.map((e) => (
+              <option key={e.valor} value={e.valor}>{e.rotulo}</option>
+            ))}
+          </select>
+        </Campo>
       </section>
 
       {/* Seção 4 */}
@@ -582,27 +616,47 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
               Falante 1 é você — sotaque já informado acima. Informe o sotaque dos demais, se souber.
             </p>
             {Array.from({ length: numFalantes - 1 }, (_, i) => (
-              <Campo
-                key={i}
-                id={`sotaque_falante_${i + 2}`}
-                rotulo={`Sotaque do falante ${i + 2}`}
-                ajuda="Opcional — deixe em branco se não souber."
-                erro={erros[`falantes.${i + 1}.sotaque`]}
-              >
-                <select
+              <div key={i} className="space-y-3 rounded-lg border border-stone-200 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-verde-800/70">Falante {i + 2}</p>
+                <Campo
                   id={`sotaque_falante_${i + 2}`}
-                  value={sotaquesFalantes[i]}
-                  onChange={(e) => setSotaqueFalante(i, e.target.value)}
-                  className={inputClasse(!!erros[`falantes.${i + 1}.sotaque`])}
+                  rotulo="Sotaque"
+                  ajuda="Opcional — deixe em branco se não souber."
+                  erro={erros[`falantes.${i + 1}.sotaque`]}
                 >
-                  <option value="">Não sei / prefiro não dizer</option>
-                  {SOTAQUES.map((s) => (
-                    <option key={s.valor} value={s.valor}>
-                      {"numero" in s ? `${s.numero}. ${s.rotulo}` : s.rotulo}
-                    </option>
-                  ))}
-                </select>
-              </Campo>
+                  <select
+                    id={`sotaque_falante_${i + 2}`}
+                    value={sotaquesFalantes[i]}
+                    onChange={(e) => setSotaqueFalante(i, e.target.value)}
+                    className={inputClasse(!!erros[`falantes.${i + 1}.sotaque`])}
+                  >
+                    <option value="">Não sei / prefiro não dizer</option>
+                    {SOTAQUES.map((s) => (
+                      <option key={s.valor} value={s.valor}>
+                        {"numero" in s ? `${s.numero}. ${s.rotulo}` : s.rotulo}
+                      </option>
+                    ))}
+                  </select>
+                </Campo>
+                <Campo
+                  id={`escolaridade_falante_${i + 2}`}
+                  rotulo="Escolaridade"
+                  ajuda="Opcional — deixe em branco se não souber."
+                  erro={erros[`falantes.${i + 1}.escolaridade`]}
+                >
+                  <select
+                    id={`escolaridade_falante_${i + 2}`}
+                    value={escolaridadesFalantes[i]}
+                    onChange={(e) => setEscolaridadeFalante(i, e.target.value)}
+                    className={inputClasse(!!erros[`falantes.${i + 1}.escolaridade`])}
+                  >
+                    <option value="">Não sei / prefiro não dizer</option>
+                    {ESCOLARIDADES.map((e) => (
+                      <option key={e.valor} value={e.valor}>{e.rotulo}</option>
+                    ))}
+                  </select>
+                </Campo>
+              </div>
             ))}
           </div>
         )}
