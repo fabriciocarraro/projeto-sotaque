@@ -31,7 +31,7 @@ const CONSENT_TEXTOS: Array<{ id: keyof Consent; texto: string }> = [
   {
     id: "checkbox_1",
     texto:
-      "Confirmo que tenho 18 anos ou mais, que estou localizada no Brasil no momento da contribuição e que estou contribuindo com a minha própria voz.",
+      "Confirmo que tenho 18 anos ou mais, que estou localizado no Brasil no momento da contribuição e que estou contribuindo com a minha própria voz e/ou com vozes de pessoas que me autorizaram a gravar e enviar.",
   },
   {
     id: "checkbox_2",
@@ -167,6 +167,8 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       regiao &&
       estado &&
       faixaEtaria &&
+      genero &&
+      escolaridade &&
       arquivo !== null &&
       !erroArquivo
     );
@@ -219,8 +221,8 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       estado_principal: estado,
       cidade_microrregiao: cidade.trim() || undefined,
       faixa_etaria: faixaEtaria,
-      genero: genero || undefined,
-      escolaridade: escolaridade || undefined,
+      genero: genero,
+      escolaridade: escolaridade,
       tipo_dispositivo: dispositivo || undefined,
       tipo_microfone: microfone || undefined,
       ambiente_gravacao: ambiente || undefined,
@@ -438,7 +440,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
           <h2 className="text-lg font-semibold text-verde-900">3. Perfil demográfico</h2>
-          <p className="mt-1 text-sm text-verde-800">Informações autoidentificadas — o gênero é opcional.</p>
+          <p className="mt-1 text-sm text-verde-800">Informações autoidentificadas.</p>
         </div>
         <Campo
           id="faixa"
@@ -462,7 +464,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
         <Campo
           id="genero"
           rotulo="Gênero"
-          ajuda="Opcional, autoidentificado."
+          obrigatorio
           erro={erros["genero"]}
         >
           <select
@@ -471,7 +473,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
             onChange={(e) => setGenero(e.target.value)}
             className={inputClasse(!!erros["genero"])}
           >
-            <option value="">Prefiro não informar / em branco</option>
+            <option value="">Selecione…</option>
             {GENEROS.map((g) => (
               <option key={g.valor} value={g.valor}>{g.rotulo}</option>
             ))}
@@ -481,7 +483,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
         <Campo
           id="escolaridade"
           rotulo="Nível de escolaridade (máximo concluído ou em curso)"
-          ajuda="Opcional, autoidentificado."
+          obrigatorio
           erro={erros["escolaridade"]}
         >
           <select
@@ -490,7 +492,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
             onChange={(e) => setEscolaridade(e.target.value)}
             className={inputClasse(!!erros["escolaridade"])}
           >
-            <option value="">Prefiro não informar / em branco</option>
+            <option value="">Selecione…</option>
             {ESCOLARIDADES.map((e) => (
               <option key={e.valor} value={e.valor}>{e.rotulo}</option>
             ))}

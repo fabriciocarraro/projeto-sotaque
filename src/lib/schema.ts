@@ -40,8 +40,8 @@ export const submissaoSchema = z.object({
     .preprocess(vazioParaUndefined, z.string().trim().max(120).optional()),
 
   faixa_etaria: z.enum(valoresDe(FAIXAS_ETARIAS)),
-  genero: z.preprocess(vazioParaUndefined, z.enum(valoresDe(GENEROS)).optional()),
-  escolaridade: z.preprocess(vazioParaUndefined, z.enum(valoresDe(ESCOLARIDADES)).optional()),
+  genero: z.enum(valoresDe(GENEROS), { errorMap: () => ({ message: "Selecione uma opção." }) }),
+  escolaridade: z.enum(valoresDe(ESCOLARIDADES), { errorMap: () => ({ message: "Selecione uma opção." }) }),
 
   tipo_dispositivo: z.preprocess(vazioParaUndefined, z.enum(valoresDe(DISPOSITIVOS)).optional()),
   tipo_microfone: z.preprocess(vazioParaUndefined, z.enum(valoresDe(MICROFONES)).optional()),

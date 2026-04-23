@@ -70,7 +70,6 @@ export const GENEROS = [
   { valor: "homem", rotulo: "Homem" },
   { valor: "nao-binario", rotulo: "Não-binário" },
   { valor: "outro", rotulo: "Outro" },
-  { valor: "prefiro-nao-informar", rotulo: "Prefiro não informar" },
 ] as const;
 
 export const DISPOSITIVOS = [
@@ -102,7 +101,6 @@ export const ESCOLARIDADES = [
   { valor: "fundamental-1", rotulo: "Ensino Fundamental I (até 5º ano)" },
   { valor: "fundamental-2-medio", rotulo: "Ensino Fundamental II / Ensino Médio" },
   { valor: "superior", rotulo: "Ensino Superior (completo ou incompleto)" },
-  { valor: "prefiro-nao-informar", rotulo: "Prefiro não informar" },
 ] as const;
 
 export const QUALIDADE = [1, 2, 3, 4, 5] as const;
