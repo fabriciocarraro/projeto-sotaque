@@ -7,15 +7,15 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "1x0000000
 
 <Base title="Revogar consentimento — SOTAQUE">
   <div class="mx-auto max-w-prose px-4 py-14">
-    <h1 class="text-3xl font-bold tracking-tight text-stone-900 md:text-4xl">Revogar consentimento</h1>
-    <p class="mt-4 leading-relaxed text-stone-700">
+    <h1 class="text-3xl font-bold tracking-tight text-verde-900 md:text-4xl">Revogar consentimento</h1>
+    <p class="mt-4 leading-relaxed text-verde-900">
       Você pode pedir a revogação do seu consentimento a qualquer momento. Ao receber seu pedido,
       o Projeto cessará novos usos baseados em consentimento, registrará a revogação e removerá a
       contribuição dos canais sob controle do Projeto sempre que tecnicamente viável.
     </p>
 
-    <div class="mt-6 rounded-xl border-l-4 border-verde-600 bg-white p-5 text-sm text-stone-700 shadow-sm">
-      <p class="font-semibold text-stone-900">Limitações importantes</p>
+    <div class="mt-6 rounded-xl border-l-4 border-verde-600 bg-white p-5 text-sm text-verde-900 shadow-sm">
+      <p class="font-semibold text-verde-900">Limitações importantes</p>
       <p class="mt-2 leading-relaxed">
         A retirada do consentimento não garante a exclusão total de cópias já redistribuídas por
         terceiros nem a reversão integral de efeitos produzidos por treinamento de modelos já
@@ -29,7 +29,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "1x0000000
       <FormularioRevogacao client:load turnstileSiteKey={turnstileSiteKey} />
     </div>
 
-    <div class="mt-8 rounded-md border border-stone-200 bg-amarelo-50 p-4 text-sm text-stone-700">
+    <div class="mt-8 rounded-md border border-stone-200 bg-amarelo-50 p-4 text-sm text-verde-900">
       <p>
         Prefere usar e-mail? Escreva para
         <a href="mailto:contato@fabriciocarraro.com.br" class="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800"

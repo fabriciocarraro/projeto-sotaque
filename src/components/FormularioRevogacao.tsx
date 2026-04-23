@@ -90,7 +90,7 @@ export default function FormularioRevogacao({ turnstileSiteKey }: Props) {
   return (
     <form onSubmit={onSubmit} className="space-y-5" noValidate>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-stone-800">
+        <label htmlFor="email" className="block text-sm font-medium text-verde-900">
           E-mail usado na contribuição <span className="text-red-600">*</span>
         </label>
         <input
@@ -106,7 +106,7 @@ export default function FormularioRevogacao({ turnstileSiteKey }: Props) {
       </div>
 
       <div>
-        <label htmlFor="submission_id" className="block text-sm font-medium text-stone-800">
+        <label htmlFor="submission_id" className="block text-sm font-medium text-verde-900">
           Identificador da submissão
         </label>
         <input
@@ -124,7 +124,7 @@ export default function FormularioRevogacao({ turnstileSiteKey }: Props) {
       </div>
 
       <div>
-        <label htmlFor="motivo" className="block text-sm font-medium text-stone-800">
+        <label htmlFor="motivo" className="block text-sm font-medium text-verde-900">
           Motivo / observações
         </label>
         <textarea

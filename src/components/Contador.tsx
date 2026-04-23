@@ -88,7 +88,7 @@ export default function Contador() {
   const plural = n === 1 ? "contribuição" : "contribuições";
 
   return (
-    <p className="text-sm text-stone-700">
+    <p className="text-sm text-verde-900">
       O Projeto SOTAQUE já reuniu{" "}
       <strong className="font-semibold text-verde-700 tabular-nums">
         {valor} {unidade}
