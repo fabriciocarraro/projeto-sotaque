@@ -721,9 +721,33 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
             <a href="/termo" className="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800" target="_blank" rel="noopener">
               Termo de Consentimento e Aviso de Privacidade
             </a>
-            . Para enviar, marque <strong className="font-semibold text-verde-900">todas</strong> as confirmações abaixo. Nenhuma vem pré-marcada.
+            {" "}antes de prosseguir. Marque todas as confirmações abaixo — individualmente ou de uma vez.
           </p>
         </div>
+
+        {!todosConsentimentos && (
+          <button
+            type="button"
+            onClick={() =>
+              setConsent({
+                checkbox_1: true,
+                checkbox_2: true,
+                checkbox_3: true,
+                checkbox_4: true,
+                checkbox_5: true,
+                checkbox_6: true,
+                checkbox_7: true,
+              })
+            }
+            className="inline-flex items-center gap-2 rounded-md border border-verde-600/50 bg-verde-50 px-4 py-2 text-sm font-medium text-verde-700 transition hover:bg-verde-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+              <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+            </svg>
+            Li e concordo com todas as declarações abaixo
+          </button>
+        )}
+
         <ul className="space-y-2">
           {CONSENT_TEXTOS.map(({ id, texto }, idx) => (
             <li key={id}>
