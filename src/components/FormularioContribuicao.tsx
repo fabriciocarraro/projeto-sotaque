@@ -31,37 +31,37 @@ const CONSENT_TEXTOS: Array<{ id: keyof Consent; texto: string }> = [
   {
     id: "checkbox_1",
     texto:
-      "Confirmo que tenho 18 anos ou mais, que estou localizado no Brasil no momento da contribuição e que estou contribuindo com a minha própria voz e/ou com vozes de pessoas que me autorizaram a gravar e enviar.",
+      "Tenho 18 anos ou mais, estou no Brasil e tenho autorização para enviar todas as vozes desta gravação.",
   },
   {
     id: "checkbox_2",
     texto:
-      "Li e compreendi o Termo de Consentimento e Aviso de Privacidade, incluindo as finalidades, os riscos e os limites da retirada do consentimento.",
+      "Li e compreendi o Termo de Consentimento e Aviso de Privacidade.",
   },
   {
     id: "checkbox_3",
     texto:
-      "Dou meu consentimento explícito para a coleta, tratamento, curadoria e documentação das minhas contribuições para formação do dataset.",
+      "Consinto com a coleta, tratamento e curadoria da minha contribuição para o dataset.",
   },
   {
     id: "checkbox_4",
     texto:
-      "Dou meu consentimento explícito para a publicação aberta, distribuição e reutilização das minhas gravações, transcrições e metadados permitidos nos termos da licença do Projeto (CDLA-Permissive-2.0).",
+      "Consinto com a publicação aberta e reutilização da minha gravação sob a licença CDLA-Permissive-2.0.",
   },
   {
     id: "checkbox_5",
     texto:
-      "Dou meu consentimento explícito para o uso das minhas contribuições no treinamento, ajuste, avaliação e melhoria de tecnologias de fala, inclusive modelos TTS.",
+      "Consinto com o uso da minha gravação para treinar e avaliar tecnologias de fala.",
   },
   {
     id: "checkbox_6",
     texto:
-      "Compreendo que a participação é gratuita e voluntária, sem promessa de pagamento, royalties ou compensação.",
+      "Entendo que a participação é voluntária e sem remuneração.",
   },
   {
     id: "checkbox_7",
     texto:
-      "Compreendo que posso retirar meu consentimento para usos futuros sob controle do Projeto, mas que cópias já redistribuídas e modelos já treinados podem não ser totalmente removidos.",
+      "Entendo que posso revogar meu consentimento, mas que cópias já distribuídas e modelos já treinados não podem ser removidos.",
   },
 ];
 
