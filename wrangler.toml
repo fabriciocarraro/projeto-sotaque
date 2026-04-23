@@ -12,7 +12,7 @@ TERMO_VERSAO = "1.0"
 [[d1_databases]]
 binding = "DB"
 database_name = "sotaque-db"
-database_id = "PREENCHER_APOS_CRIAR_D1"
+database_id = "3eab40eb-c1b8-4574-a216-617df8533a5a"
 migrations_dir = "migrations"
 
 [[r2_buckets]]
