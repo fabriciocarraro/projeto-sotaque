@@ -2,13 +2,11 @@
 import Base from "../layouts/Base.astro";
 import Card from "../components/Card.astro";
 import Contador from "../components/Contador.tsx";
-import BarraMeta from "../components/BarraMeta.tsx";
 ---
 
 <Base title="SOTAQUE — Dataset aberto de vozes em português brasileiro">
   <div class="border-b border-verde-600/20 bg-verde-50/60">
-    <div class="mx-auto flex max-w-5xl items-center justify-center gap-2 px-4 py-2.5 text-center">
-      <span class="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-verde-600 motion-safe:animate-pulse" aria-hidden></span>
+    <div class="mx-auto max-w-5xl px-4 py-3">
       <Contador client:load />
     </div>
   </div>
@@ -43,8 +41,6 @@ import BarraMeta from "../components/BarraMeta.tsx";
       </div>
     </div>
   </section>
-
-  <BarraMeta client:load />
 
   <section class="mx-auto max-w-5xl px-4 py-14">
     <div class="grid gap-6 md:grid-cols-3">

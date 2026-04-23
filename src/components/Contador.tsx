@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+const META_HORAS = 10_000;
+
 type Estatisticas = {
   total_contribuicoes: number;
   total_segundos: number;
@@ -26,7 +28,6 @@ function formatarTempo(segundos: number): { valor: string; unidade: string } {
   return { valor: formatarHoras(h), unidade: h === 1 ? "hora" : "horas" };
 }
 
-// easeOutCubic: começa rápido, desacelera no fim
 function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
@@ -78,26 +79,50 @@ export default function Contador() {
   const contribAnimado = useContagemAnimada(dados?.total_contribuicoes ?? 0);
 
   if (erro || !dados) {
-    return (
-      <div aria-hidden className="h-6" />
-    );
+    return <div aria-hidden className="h-10" />;
   }
 
   const { valor, unidade } = formatarTempo(tempoAnimado);
   const n = Math.floor(contribAnimado);
   const plural = n === 1 ? "contribuição" : "contribuições";
 
+  const horasAnimadas = tempoAnimado / 3600;
+  const pct = Math.min(100, (horasAnimadas / META_HORAS) * 100);
+  const pctTexto =
+    pct < 0.1
+      ? "<0,1%"
+      : `${pct.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
+
   return (
-    <p className="text-sm text-verde-900">
-      O Projeto SOTAQUE já reuniu{" "}
-      <strong className="font-semibold text-verde-700 tabular-nums">
-        {valor} {unidade}
-      </strong>{" "}
-      de vozes brasileiras, em{" "}
-      <strong className="font-semibold text-verde-700 tabular-nums">
-        {n.toLocaleString("pt-BR")} {plural}
-      </strong>
-      {" "}— meta: <strong className="font-semibold text-verde-700">10.000 horas</strong>.
-    </p>
+    <div className="w-full text-center">
+      <p className="inline-flex items-center justify-center gap-2 text-sm text-verde-900">
+        <span className="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-verde-600 motion-safe:animate-pulse" aria-hidden />
+        <span>O Projeto SOTAQUE já reuniu{" "}
+        <strong className="font-semibold text-verde-700 tabular-nums">
+          {valor} {unidade}
+        </strong>{" "}
+        de vozes brasileiras, em{" "}
+        <strong className="font-semibold text-verde-700 tabular-nums">
+          {n.toLocaleString("pt-BR")} {plural}
+        </strong>
+        {" "}— meta:{" "}
+        <strong className="font-semibold text-verde-700">10.000 horas</strong>
+        </span>
+      </p>
+      <div className="mx-auto mt-2 flex max-w-md items-center gap-3">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-verde-200">
+          <div
+            className="h-full rounded-full bg-verde-600 transition-all duration-700"
+            style={{ width: `${pct}%` }}
+            role="progressbar"
+            aria-valuenow={Math.round(pct * 10) / 10}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Progresso em direção à meta de 10.000 horas"
+          />
+        </div>
+        <span className="flex-shrink-0 text-xs tabular-nums text-verde-800/70">{pctTexto}</span>
+      </div>
+    </div>
   );
 }
