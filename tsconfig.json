@@ -11,3 +11,4 @@
   "include": [".astro/types.d.ts", "**/*", "functions/**/*"],
   "exclude": ["dist", "node_modules"]
 }
+
