@@ -308,7 +308,9 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
           >
             <option value="">Selecione…</option>
             {SOTAQUES.map((s) => (
-              <option key={s.valor} value={s.valor}>{s.rotulo}</option>
+              <option key={s.valor} value={s.valor}>
+                {"numero" in s ? `${s.numero}. ${s.rotulo}` : s.rotulo}
+              </option>
             ))}
           </select>
         </Campo>

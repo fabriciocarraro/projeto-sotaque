@@ -13,8 +13,12 @@ const { title, description = "Projeto SOTAQUE — dataset aberto de vozes em por
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://rsms.me/" />
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <title>{title}</title>
   </head>
   <body class="min-h-screen bg-amarelo-100 text-stone-800 antialiased flex flex-col">
@@ -28,7 +32,6 @@ const { title, description = "Projeto SOTAQUE — dataset aberto de vozes em por
           <a href="/" class="transition hover:text-verde-700">Início</a>
           <a href="/sobre" class="transition hover:text-verde-700">Sobre</a>
           <a href="/termo" class="transition hover:text-verde-700">Termo</a>
-          <a href="/revogacao" class="transition hover:text-verde-700">Revogar consentimento</a>
           <a
             href="/contribuir"
             class="inline-flex items-center rounded-md bg-verde-600 px-3.5 py-1.5 font-medium text-white shadow-sm transition hover:bg-verde-700"
