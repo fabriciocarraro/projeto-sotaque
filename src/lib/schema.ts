@@ -58,6 +58,18 @@ export const submissaoSchema = z.object({
       .optional(),
   ),
 
+  falantes: z
+    .array(
+      z.object({
+        sotaque: z.preprocess(
+          vazioParaUndefined,
+          z.enum(valoresDe(SOTAQUES)).optional(),
+        ),
+      }),
+    )
+    .min(1, "Informe ao menos um falante.")
+    .max(5, "Máximo de 5 falantes por gravação."),
+
   consentimento: consentimentoSchema,
   turnstileToken: z.string().min(1, "Verificação anti-spam ausente."),
 });

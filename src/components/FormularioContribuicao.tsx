@@ -135,6 +135,9 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
   const [ambiente, setAmbiente] = useState("");
   const [qualidade, setQualidade] = useState("");
 
+  const [numFalantes, setNumFalantes] = useState(1);
+  const [sotaquesFalantes, setSotaquesFalantes] = useState<string[]>(["", "", "", ""]);
+
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [duracao, setDuracao] = useState<number | null>(null);
   const [erroArquivo, setErroArquivo] = useState<string | null>(null);
@@ -219,6 +222,10 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       ambiente_gravacao: ambiente || undefined,
       autoavaliacao_qualidade: qualidade ? Number(qualidade) : undefined,
       audio_duracao_segundos: duracao ?? undefined,
+      falantes: [
+        { sotaque: sotaque || undefined },
+        ...sotaquesFalantes.slice(0, numFalantes - 1).map((s) => ({ sotaque: s || undefined })),
+      ],
       consentimento: consent,
       turnstileToken,
     };
@@ -270,6 +277,14 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
     } finally {
       setEnviando(false);
     }
+  }
+
+  function setSotaqueFalante(idx: number, valor: string) {
+    setSotaquesFalantes((prev) => {
+      const copia = [...prev];
+      copia[idx] = valor;
+      return copia;
+    });
   }
 
   function setConsentField(id: keyof Consent, v: boolean) {
@@ -532,10 +547,71 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
         </Campo>
       </section>
 
-      {/* Seção 5 */}
+      {/* Seção 5 — falantes */}
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
-          <h2 className="text-lg font-semibold text-verde-900">5. Arquivo de áudio</h2>
+          <h2 className="text-lg font-semibold text-verde-900">5. Falantes na gravação</h2>
+          <p className="mt-1 text-sm text-verde-800">
+            Se a gravação tiver mais de uma pessoa (podcast, reunião, conversa), informe quantos falantes participam.
+          </p>
+        </div>
+
+        <Campo
+          id="num_falantes"
+          rotulo="Quantas pessoas estão no áudio?"
+          obrigatorio
+          erro={erros["falantes"]}
+        >
+          <select
+            id="num_falantes"
+            value={numFalantes}
+            onChange={(e) => setNumFalantes(Number(e.target.value))}
+            className={inputClasse(!!erros["falantes"])}
+          >
+            {[1, 2, 3, 4, 5].map((n) => (
+              <option key={n} value={n}>
+                {n === 1 ? "1 pessoa (só eu)" : `${n} pessoas`}
+              </option>
+            ))}
+          </select>
+        </Campo>
+
+        {numFalantes >= 2 && (
+          <div className="space-y-3">
+            <p className="text-xs text-verde-800/80">
+              Falante 1 é você — sotaque já informado acima. Informe o sotaque dos demais, se souber.
+            </p>
+            {Array.from({ length: numFalantes - 1 }, (_, i) => (
+              <Campo
+                key={i}
+                id={`sotaque_falante_${i + 2}`}
+                rotulo={`Sotaque do falante ${i + 2}`}
+                ajuda="Opcional — deixe em branco se não souber."
+                erro={erros[`falantes.${i + 1}.sotaque`]}
+              >
+                <select
+                  id={`sotaque_falante_${i + 2}`}
+                  value={sotaquesFalantes[i]}
+                  onChange={(e) => setSotaqueFalante(i, e.target.value)}
+                  className={inputClasse(!!erros[`falantes.${i + 1}.sotaque`])}
+                >
+                  <option value="">Não sei / prefiro não dizer</option>
+                  {SOTAQUES.map((s) => (
+                    <option key={s.valor} value={s.valor}>
+                      {"numero" in s ? `${s.numero}. ${s.rotulo}` : s.rotulo}
+                    </option>
+                  ))}
+                </select>
+              </Campo>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Seção 6 */}
+      <section className="space-y-4 border-b border-stone-200 pb-8">
+        <div>
+          <h2 className="text-lg font-semibold text-verde-900">6. Arquivo de áudio</h2>
           <p className="mt-1 text-sm text-verde-800">
             Envie um arquivo de até {formatarTamanho(AUDIO_TAMANHO_MAX)}. Formatos aceitos:{" "}
             {EXTENSOES_PERMITIDAS.join(", ")}.
@@ -580,10 +656,10 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
         {erroArquivo && <p className="text-sm text-red-600">{erroArquivo}</p>}
       </section>
 
-      {/* Seção 6 — consentimentos */}
+      {/* Seção 7 — consentimentos */}
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
-          <h2 className="text-lg font-semibold text-verde-900">6. Consentimento</h2>
+          <h2 className="text-lg font-semibold text-verde-900">7. Consentimento</h2>
           <p className="mt-1 text-sm text-verde-800">
             Leia o{" "}
             <a href="/termo" className="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800" target="_blank" rel="noopener">

@@ -122,14 +122,16 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return respostaJson({ error: "Falha ao armazenar o áudio. Tente novamente." }, 500);
   }
 
+  const numFalantes = dados.falantes.length;
+
   try {
     const stmtSubmission = env.DB.prepare(
       `INSERT INTO submissions (
         id, pseudonimo, sotaque_declarado, regiao_socializacao, estado_principal,
         cidade_microrregiao, faixa_etaria, genero, tipo_dispositivo, tipo_microfone,
         ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
-        audio_mimetype, audio_nome_original, audio_duracao_segundos, status_moderacao, criado_em
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?)`,
+        audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes, status_moderacao, criado_em
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?)`,
     ).bind(
       id,
       dados.pseudonimo,
@@ -149,6 +151,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       mimetype,
       audio.name,
       dados.audio_duracao_segundos ?? null,
+      numFalantes,
       agora,
     );
 
@@ -167,7 +170,16 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       agora,
     );
 
-    await env.DB.batch([stmtSubmission, stmtConsent]);
+    const stmtsSpeakers = dados.falantes
+      .slice(1)
+      .map((f, i) =>
+        env.DB.prepare(
+          `INSERT INTO submission_speakers (submission_id, speaker_index, sotaque)
+           VALUES (?, ?, ?)`,
+        ).bind(id, i + 2, f.sotaque ?? null),
+      );
+
+    await env.DB.batch([stmtSubmission, stmtConsent, ...stmtsSpeakers]);
   } catch (err) {
     // rollback do arquivo no R2 se o banco falhar
     try {
