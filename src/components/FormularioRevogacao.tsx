@@ -90,7 +90,7 @@ export default function FormularioRevogacao({ turnstileSiteKey }: Props) {
   return (
     <form onSubmit={onSubmit} className="space-y-5" noValidate>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-800">
+        <label htmlFor="email" className="block text-sm font-medium text-stone-800">
           E-mail usado na contribuição <span className="text-red-600">*</span>
         </label>
         <input
@@ -99,14 +99,14 @@ export default function FormularioRevogacao({ turnstileSiteKey }: Props) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           maxLength={255}
-          className={`mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 ${erros["email"] ? "border-red-400" : "border-slate-300"}`}
+          className={`mt-1 block w-full rounded-md border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-verde-500 ${erros["email"] ? "border-red-400" : "border-stone-300"}`}
           required
         />
         {erros["email"] && <p className="mt-1 text-xs text-red-600">{erros["email"]}</p>}
       </div>
 
       <div>
-        <label htmlFor="submission_id" className="block text-sm font-medium text-slate-800">
+        <label htmlFor="submission_id" className="block text-sm font-medium text-stone-800">
           Identificador da submissão
         </label>
         <input
@@ -115,16 +115,16 @@ export default function FormularioRevogacao({ turnstileSiteKey }: Props) {
           value={submissionId}
           onChange={(e) => setSubmissionId(e.target.value)}
           placeholder="Opcional — se você tiver guardado o ID da contribuição"
-          className={`mt-1 block w-full rounded-md border px-3 py-2 font-mono text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500 ${erros["submission_id"] ? "border-red-400" : "border-slate-300"}`}
+          className={`mt-1 block w-full rounded-md border px-3 py-2 font-mono text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-verde-500 ${erros["submission_id"] ? "border-red-400" : "border-stone-300"}`}
         />
         {erros["submission_id"] && <p className="mt-1 text-xs text-red-600">{erros["submission_id"]}</p>}
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-stone-500">
           Se não souber, deixe em branco. Vamos localizar suas contribuições pelo e-mail.
         </p>
       </div>
 
       <div>
-        <label htmlFor="motivo" className="block text-sm font-medium text-slate-800">
+        <label htmlFor="motivo" className="block text-sm font-medium text-stone-800">
           Motivo / observações
         </label>
         <textarea
@@ -133,9 +133,9 @@ export default function FormularioRevogacao({ turnstileSiteKey }: Props) {
           onChange={(e) => setMotivo(e.target.value)}
           maxLength={2000}
           rows={4}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-verde-500"
         />
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-stone-500">
           Opcional. Ajuda a processar o pedido mais rápido, mas não é obrigatório informar.
         </p>
       </div>
@@ -158,7 +158,7 @@ export default function FormularioRevogacao({ turnstileSiteKey }: Props) {
       <button
         type="submit"
         disabled={enviando || !token || !email}
-        className="inline-flex items-center rounded-md bg-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+        className="inline-flex items-center rounded-md bg-verde-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-verde-700 disabled:cursor-not-allowed disabled:bg-stone-300"
       >
         {enviando ? "Enviando…" : "Enviar pedido de revogação"}
       </button>

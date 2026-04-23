@@ -243,10 +243,13 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-10" noValidate>
+    <form onSubmit={onSubmit} className="space-y-8 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm md:p-8" noValidate>
       {/* Seção 1 */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">1. Identificação</h2>
+      <section className="space-y-4 border-b border-stone-200 pb-8">
+        <div>
+          <h2 className="text-lg font-semibold text-stone-900">1. Identificação</h2>
+          <p className="mt-1 text-sm text-stone-600">Seus dados de contato e pseudônimo público.</p>
+        </div>
         <Campo
           id="pseudonimo"
           rotulo="Pseudônimo público"
@@ -284,8 +287,11 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       </section>
 
       {/* Seção 2 */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">2. Perfil linguístico</h2>
+      <section className="space-y-4 border-b border-stone-200 pb-8">
+        <div>
+          <h2 className="text-lg font-semibold text-stone-900">2. Perfil linguístico</h2>
+          <p className="mt-1 text-sm text-stone-600">Ajude a caracterizar o seu sotaque e origem.</p>
+        </div>
 
         <Campo
           id="sotaque"
@@ -363,8 +369,11 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       </section>
 
       {/* Seção 3 */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">3. Perfil demográfico</h2>
+      <section className="space-y-4 border-b border-stone-200 pb-8">
+        <div>
+          <h2 className="text-lg font-semibold text-stone-900">3. Perfil demográfico</h2>
+          <p className="mt-1 text-sm text-stone-600">Informações autoidentificadas — o gênero é opcional.</p>
+        </div>
         <Campo
           id="faixa"
           rotulo="Faixa etária"
@@ -405,11 +414,13 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       </section>
 
       {/* Seção 4 */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">4. Sobre a gravação</h2>
-        <p className="text-sm text-slate-600">
-          Campos opcionais que nos ajudam a entender a diversidade de equipamentos e ambientes.
-        </p>
+      <section className="space-y-4 border-b border-stone-200 pb-8">
+        <div>
+          <h2 className="text-lg font-semibold text-stone-900">4. Sobre a gravação</h2>
+          <p className="mt-1 text-sm text-stone-600">
+            Campos opcionais que nos ajudam a entender a diversidade de equipamentos e ambientes.
+          </p>
+        </div>
 
         <Campo id="dispositivo" rotulo="Tipo de dispositivo" erro={erros["tipo_dispositivo"]}>
           <select
@@ -461,14 +472,14 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
         >
           <div className="flex items-center gap-3" role="radiogroup" aria-label="Autoavaliação de qualidade">
             {QUALIDADE.map((n) => (
-              <label key={n} className="flex cursor-pointer items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50">
+              <label key={n} className="flex cursor-pointer items-center gap-1 rounded-md border border-stone-300 bg-white px-3 py-1.5 text-sm has-[:checked]:border-verde-600 has-[:checked]:bg-verde-50">
                 <input
                   type="radio"
                   name="qualidade"
                   value={n}
                   checked={qualidade === String(n)}
                   onChange={(e) => setQualidade(e.target.value)}
-                  className="accent-brand-600"
+                  className="accent-verde-600"
                 />
                 <span>{n}</span>
               </label>
@@ -477,7 +488,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
               <button
                 type="button"
                 onClick={() => setQualidade("")}
-                className="text-xs text-slate-500 underline hover:text-slate-700">
+                className="text-xs text-stone-500 underline hover:text-stone-700">
                 limpar
               </button>
             )}
@@ -486,47 +497,81 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       </section>
 
       {/* Seção 5 */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">5. Arquivo de áudio</h2>
-        <p className="text-sm text-slate-600">
-          Envie um arquivo de até {formatarTamanho(AUDIO_TAMANHO_MAX)}. Formatos aceitos:
-          {" "}
-          {EXTENSOES_PERMITIDAS.join(", ")}.
-        </p>
-        <input
-          id="audio"
-          type="file"
-          accept={EXTENSOES_PERMITIDAS.join(",")}
-          onChange={onArquivoChange}
-          className="block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:bg-brand-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-brand-700"
-          required
-        />
-        {arquivo && (
-          <p className="text-sm text-slate-600">
-            Selecionado: <span className="font-medium">{arquivo.name}</span> ({formatarTamanho(arquivo.size)})
+      <section className="space-y-4 border-b border-stone-200 pb-8">
+        <div>
+          <h2 className="text-lg font-semibold text-stone-900">5. Arquivo de áudio</h2>
+          <p className="mt-1 text-sm text-stone-600">
+            Envie um arquivo de até {formatarTamanho(AUDIO_TAMANHO_MAX)}. Formatos aceitos:{" "}
+            {EXTENSOES_PERMITIDAS.join(", ")}.
           </p>
+        </div>
+        <label
+          htmlFor="audio"
+          className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-stone-300 bg-amarelo-50/50 p-6 text-center transition hover:border-verde-600 hover:bg-verde-50"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-8 w-8 text-verde-700">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7-7-7 7M12 2v14M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2" />
+          </svg>
+          <span className="text-sm font-medium text-stone-800">
+            {arquivo ? "Trocar arquivo" : "Clique para selecionar o arquivo"}
+          </span>
+          <span className="text-xs text-stone-500">
+            Até {formatarTamanho(AUDIO_TAMANHO_MAX)} · {EXTENSOES_PERMITIDAS.join(", ")}
+          </span>
+          <input
+            id="audio"
+            type="file"
+            accept={EXTENSOES_PERMITIDAS.join(",")}
+            onChange={onArquivoChange}
+            className="sr-only"
+            required
+          />
+        </label>
+        {arquivo && (
+          <div className="flex items-center gap-3 rounded-md bg-verde-50 px-4 py-3 text-sm text-stone-800">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 flex-shrink-0 text-verde-700">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19a3 3 0 01-3 3h0a3 3 0 01-3-3v0a3 3 0 013-3h3zM21 16a3 3 0 01-3 3h0a3 3 0 01-3-3v0a3 3 0 013-3h3z" />
+            </svg>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium">{arquivo.name}</p>
+              <p className="text-xs text-stone-600">{formatarTamanho(arquivo.size)}</p>
+            </div>
+          </div>
         )}
         {erroArquivo && <p className="text-sm text-red-600">{erroArquivo}</p>}
       </section>
 
       {/* Seção 6 — consentimentos */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">6. Consentimento</h2>
-        <p className="text-sm text-slate-600">
-          Leia o <a href="/termo" className="text-brand-700 underline" target="_blank" rel="noopener">Termo de Consentimento e Aviso de Privacidade</a>. Para enviar, marque <strong>todas</strong> as confirmações abaixo. Nenhuma vem pré-marcada.
-        </p>
-        <ul className="space-y-3">
+      <section className="space-y-4 border-b border-stone-200 pb-8">
+        <div>
+          <h2 className="text-lg font-semibold text-stone-900">6. Consentimento</h2>
+          <p className="mt-1 text-sm text-stone-600">
+            Leia o{" "}
+            <a href="/termo" className="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800" target="_blank" rel="noopener">
+              Termo de Consentimento e Aviso de Privacidade
+            </a>
+            . Para enviar, marque <strong className="font-semibold text-stone-800">todas</strong> as confirmações abaixo. Nenhuma vem pré-marcada.
+          </p>
+        </div>
+        <ul className="space-y-2">
           {CONSENT_TEXTOS.map(({ id, texto }, idx) => (
             <li key={id}>
-              <label className="flex cursor-pointer gap-3 rounded-md border border-slate-200 bg-white p-3 text-sm hover:bg-slate-50">
+              <label
+                className={[
+                  "flex cursor-pointer gap-3 rounded-lg border p-3.5 text-sm transition",
+                  consent[id]
+                    ? "border-verde-600/50 bg-verde-50"
+                    : "border-stone-200 bg-white hover:border-stone-300 hover:bg-amarelo-50/40",
+                ].join(" ")}
+              >
                 <input
                   type="checkbox"
                   checked={consent[id]}
                   onChange={(e) => setConsentField(id, e.target.checked)}
-                  className="mt-0.5 h-4 w-4 flex-shrink-0 accent-brand-600"
+                  className="mt-0.5 h-4 w-4 flex-shrink-0 accent-verde-600"
                 />
-                <span>
-                  <span className="mr-1 font-medium">{idx + 1}.</span>
+                <span className="text-stone-700">
+                  <span className="mr-1 font-semibold text-stone-900">{idx + 1}.</span>
                   {texto}
                 </span>
               </label>
@@ -536,7 +581,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       </section>
 
       {/* Turnstile */}
-      <section className="space-y-3">
+      <section className="flex flex-col items-start gap-3 pt-2">
         <Turnstile
           ref={turnstileRef}
           siteKey={turnstileSiteKey}
@@ -557,12 +602,12 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
         <button
           type="submit"
           disabled={!podeEnviar}
-          className="inline-flex items-center justify-center rounded-md bg-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="inline-flex items-center justify-center rounded-md bg-verde-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-verde-700 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500"
         >
           {enviando ? "Enviando…" : "Enviar contribuição"}
         </button>
         {!podeEnviar && !enviando && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-stone-500">
             {!obrigatoriosOk
               ? "Preencha os campos obrigatórios e selecione o arquivo."
               : !todosConsentimentos
@@ -587,22 +632,22 @@ function Campo(props: {
 }) {
   return (
     <div>
-      <label htmlFor={props.id} className="block text-sm font-medium text-slate-800">
+      <label htmlFor={props.id} className="block text-sm font-medium text-stone-800">
         {props.rotulo}
-        {props.obrigatorio && <span className="ml-0.5 text-red-600" aria-hidden>*</span>}
+        {props.obrigatorio && <span className="ml-0.5 text-verde-700" aria-hidden>*</span>}
       </label>
-      <div className="mt-1">{props.children}</div>
+      <div className="mt-1.5">{props.children}</div>
       {props.ajuda && !props.erro && (
-        <p className="mt-1 text-xs text-slate-500">{props.ajuda}</p>
+        <p className="mt-1.5 text-xs text-stone-500">{props.ajuda}</p>
       )}
-      {props.erro && <p className="mt-1 text-xs text-red-600">{props.erro}</p>}
+      {props.erro && <p className="mt-1.5 text-xs font-medium text-red-600">{props.erro}</p>}
     </div>
   );
 }
 
 function inputClasse(erro: boolean): string {
   return [
-    "block w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-500",
-    erro ? "border-red-400" : "border-slate-300",
+    "block w-full rounded-md border bg-white px-3 py-2 text-sm text-stone-800 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-verde-500/70 focus:border-verde-600",
+    erro ? "border-red-400" : "border-stone-300",
   ].join(" ");
 }

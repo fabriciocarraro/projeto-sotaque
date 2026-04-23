@@ -7,20 +7,24 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "1x0000000
 ---
 
 <Base title="Contribuir — SOTAQUE">
-  <div class="mx-auto max-w-3xl px-4 py-12">
+  <div class="mx-auto max-w-3xl px-4 py-14">
     <header>
-      <h1 class="text-3xl font-bold tracking-tight">Contribuir com a minha voz</h1>
-      <p class="mt-3 text-slate-700">
+      <p class="inline-flex items-center gap-2 rounded-full border border-verde-600/30 bg-white/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-verde-800">
+        <span class="inline-block h-1.5 w-1.5 rounded-full bg-verde-600"></span>
+        SOTAQUE: Speech-Oriented Training Audio for Quality Understanding and Expression
+      </p>
+      <h1 class="mt-4 text-3xl font-bold tracking-tight text-stone-900 md:text-4xl">Contribuir com a minha voz</h1>
+      <p class="mt-3 leading-relaxed text-stone-700">
         Obrigado por doar sua voz ao Projeto SOTAQUE. Antes de enviar sua contribuição, leia o
-        <a href="/termo" class="text-brand-700 underline" target="_blank" rel="noopener">
-          Termo de Consentimento e Aviso de Privacidade
-        </a>.
+        <a href="/termo" class="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800" target="_blank" rel="noopener">
+          Termo de Consentimento e Aviso de Privacidade</a
+        >.
       </p>
     </header>
 
-    <div class="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-      <p class="font-semibold">Resumo antes do aceite:</p>
-      <p class="mt-1">
+    <div class="mt-8 rounded-xl border-l-4 border-verde-600 bg-white p-5 text-sm text-stone-700 shadow-sm">
+      <p class="font-semibold text-stone-900">Resumo antes do aceite</p>
+      <p class="mt-2 leading-relaxed">
         Ao enviar sua voz ao Projeto SOTAQUE, você concorda que suas gravações, transcrições e
         determinados metadados possam ser curados, publicados em dataset aberto e usados para
         treinar e avaliar tecnologias de fala, inclusive TTS. A participação é voluntária e
@@ -30,12 +34,12 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "1x0000000
       </p>
     </div>
 
-    <div class="mt-8 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 class="text-sm font-semibold text-slate-900">Dialetos do português brasileiro</h2>
-      <p class="mt-1 text-xs text-slate-600">
+    <div class="mt-8 rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
+      <h2 class="text-sm font-semibold text-stone-900">Dialetos do português brasileiro</h2>
+      <p class="mt-1 text-xs text-stone-600">
         Use a imagem como referência ao escolher seu sotaque no formulário.
       </p>
-      <div class="mt-3">
+      <div class="mt-4">
         <MapaDialetos />
       </div>
     </div>

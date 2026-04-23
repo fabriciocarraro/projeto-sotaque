@@ -4,15 +4,18 @@ import Card from "../components/Card.astro";
 ---
 
 <Base title="SOTAQUE — Dataset aberto de vozes em português brasileiro">
-  <section class="bg-gradient-to-b from-white to-slate-50">
-    <div class="mx-auto max-w-5xl px-4 py-16 md:py-24">
-      <p class="text-xs font-semibold uppercase tracking-wider text-brand-700">
-        Speech-Oriented Training Audio for Quality Understanding and Expression
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-amarelo-200/60 via-amarelo-100 to-amarelo-100"></div>
+    <div class="mx-auto max-w-5xl px-4 py-20 md:py-28">
+      <p class="inline-flex items-center gap-2 rounded-full border border-verde-600/30 bg-white/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-verde-800">
+        <span class="inline-block h-1.5 w-1.5 rounded-full bg-verde-600"></span>
+        SOTAQUE: Speech-Oriented Training Audio for Quality Understanding and Expression
       </p>
-      <h1 class="mt-2 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
-        Sua voz, no dataset aberto do português brasileiro.
+      <h1 class="mt-5 text-4xl font-bold leading-tight tracking-tight text-stone-900 md:text-5xl">
+        Sua voz, no dataset aberto do
+        <span class="text-verde-700">português brasileiro.</span>
       </h1>
-      <p class="mt-5 max-w-2xl text-lg text-slate-600">
+      <p class="mt-5 max-w-2xl text-lg text-stone-700">
         O SOTAQUE é um projeto voluntário e open source para construir uma base pública de vozes
         em português do Brasil, representando a diversidade de sotaques do país. O resultado é
         publicado sob licença aberta (CDLA-Permissive-2.0) e pode ser usado para treinar e avaliar
@@ -21,19 +24,19 @@ import Card from "../components/Card.astro";
       <div class="mt-8 flex flex-wrap gap-3">
         <a
           href="/contribuir"
-          class="inline-flex items-center rounded-md bg-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700"
+          class="inline-flex items-center rounded-md bg-verde-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-verde-700"
           >Contribuir com minha voz</a
         >
         <a
           href="/sobre"
-          class="inline-flex items-center rounded-md border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
+          class="inline-flex items-center rounded-md border border-verde-600/60 bg-transparent px-5 py-2.5 text-sm font-semibold text-verde-700 transition hover:bg-verde-600 hover:text-white"
           >Sobre o projeto</a
         >
       </div>
     </div>
   </section>
 
-  <section class="mx-auto max-w-5xl px-4 py-12">
+  <section class="mx-auto max-w-5xl px-4 py-14">
     <div class="grid gap-6 md:grid-cols-3">
       <Card titulo="Para qualquer brasileiro adulto">
         A participação é aberta a qualquer pessoa maior de 18 anos, localizada no Brasil, que
@@ -50,36 +53,36 @@ import Card from "../components/Card.astro";
     </div>
   </section>
 
-  <section class="bg-white">
-    <div class="mx-auto max-w-3xl px-4 py-12">
-      <h2 class="text-2xl font-semibold">Como funciona</h2>
-      <ol class="mt-6 space-y-4 text-slate-700">
-        <li class="flex gap-3">
-          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">1</span>
-          <span>
-            Leia o <a href="/termo" class="text-brand-700 underline">Termo de Consentimento e Aviso de Privacidade</a>.
+  <section class="border-y border-amarelo-300/60 bg-amarelo-50/80">
+    <div class="mx-auto max-w-3xl px-4 py-14">
+      <h2 class="text-2xl font-semibold text-stone-900">Como funciona</h2>
+      <ol class="mt-8 space-y-5 text-stone-700">
+        <li class="flex gap-4">
+          <span class="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-verde-600 text-xs font-bold text-white">1</span>
+          <span class="pt-0.5">
+            Leia o <a href="/termo" class="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800 hover:decoration-verde-700">Termo de Consentimento e Aviso de Privacidade</a>.
           </span>
         </li>
-        <li class="flex gap-3">
-          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">2</span>
-          <span>Preencha o formulário com pseudônimo, e-mail e algumas informações sobre seu sotaque e sua gravação.</span>
+        <li class="flex gap-4">
+          <span class="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-verde-600 text-xs font-bold text-white">2</span>
+          <span class="pt-0.5">Preencha o formulário com pseudônimo, e-mail e algumas informações sobre seu sotaque e sua gravação.</span>
         </li>
-        <li class="flex gap-3">
-          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">3</span>
-          <span>Envie o arquivo de áudio (até 100 MB, formatos comuns como WAV, MP3, FLAC, M4A, OGG).</span>
+        <li class="flex gap-4">
+          <span class="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-verde-600 text-xs font-bold text-white">3</span>
+          <span class="pt-0.5">Envie o arquivo de áudio (até 100 MB, formatos comuns como WAV, MP3, FLAC, M4A, OGG).</span>
         </li>
-        <li class="flex gap-3">
-          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">4</span>
-          <span>Marque as confirmações de consentimento e envie. Sua contribuição passa por curadoria antes de entrar no dataset.</span>
+        <li class="flex gap-4">
+          <span class="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-verde-600 text-xs font-bold text-white">4</span>
+          <span class="pt-0.5">Marque as confirmações de consentimento e envie. Sua contribuição passa por curadoria antes de entrar no dataset.</span>
         </li>
       </ol>
     </div>
   </section>
 
-  <section class="mx-auto max-w-3xl px-4 py-12">
-    <div class="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
-      <p class="font-semibold">Antes de contribuir, o essencial:</p>
-      <p class="mt-2">
+  <section class="mx-auto max-w-3xl px-4 py-14">
+    <div class="rounded-xl border-l-4 border-verde-600 bg-white/70 p-6 text-sm text-stone-700 shadow-sm">
+      <p class="font-semibold text-stone-900">Antes de contribuir, o essencial:</p>
+      <p class="mt-2 leading-relaxed">
         Ao enviar sua voz ao Projeto SOTAQUE, você concorda que suas gravações, transcrições e
         determinados metadados possam ser curados, publicados em dataset aberto e usados para
         treinar e avaliar tecnologias de fala, inclusive TTS. A participação é voluntária e restrita
@@ -90,7 +93,3 @@ import Card from "../components/Card.astro";
     </div>
   </section>
 </Base>
-
-<script>
-  // noop — placeholder para eventual telemetria anônima
-</script>

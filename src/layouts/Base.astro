@@ -17,20 +17,25 @@ const { title, description = "Projeto SOTAQUE — dataset aberto de vozes em por
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     <title>{title}</title>
   </head>
-  <body class="min-h-screen bg-slate-50 text-slate-900 antialiased flex flex-col">
-    <header class="border-b border-slate-200 bg-white">
+  <body class="min-h-screen bg-amarelo-100 text-stone-800 antialiased flex flex-col">
+    <header class="border-b border-amarelo-300/70 bg-amarelo-50/90 backdrop-blur supports-[backdrop-filter]:bg-amarelo-50/70">
       <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-        <a href="/" class="flex items-center gap-2 font-semibold tracking-tight">
-          <span class="inline-block h-6 w-6 rounded-sm bg-brand-600"></span>
-          <span>SOTAQUE</span>
+        <a href="/" class="group flex items-center gap-2.5 font-semibold tracking-tight text-stone-900">
+          <span class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-verde-600 text-[10px] font-bold text-white shadow-sm transition group-hover:bg-verde-700">S</span>
+          <span class="text-lg">SOTAQUE</span>
         </a>
-        <nav class="hidden gap-6 text-sm text-slate-600 md:flex">
-          <a href="/" class="hover:text-slate-900">Início</a>
-          <a href="/sobre" class="hover:text-slate-900">Sobre</a>
-          <a href="/termo" class="hover:text-slate-900">Termo</a>
-          <a href="/contribuir" class="font-medium text-brand-700 hover:text-brand-900">Contribuir</a>
-          <a href="/revogacao" class="hover:text-slate-900">Revogar consentimento</a>
+        <nav class="hidden items-center gap-6 text-sm text-stone-700 md:flex">
+          <a href="/" class="transition hover:text-verde-700">Início</a>
+          <a href="/sobre" class="transition hover:text-verde-700">Sobre</a>
+          <a href="/termo" class="transition hover:text-verde-700">Termo</a>
+          <a href="/revogacao" class="transition hover:text-verde-700">Revogar consentimento</a>
+          <a
+            href="/contribuir"
+            class="inline-flex items-center rounded-md bg-verde-600 px-3.5 py-1.5 font-medium text-white shadow-sm transition hover:bg-verde-700"
+            >Contribuir</a
+          >
         </nav>
+        <a href="/contribuir" class="md:hidden inline-flex items-center rounded-md bg-verde-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-verde-700">Contribuir</a>
       </div>
     </header>
 
@@ -38,37 +43,40 @@ const { title, description = "Projeto SOTAQUE — dataset aberto de vozes em por
       <slot />
     </main>
 
-    <footer class="border-t border-slate-200 bg-white">
-      <div class="mx-auto max-w-5xl px-4 py-8 text-sm text-slate-600">
-        <div class="grid gap-4 md:grid-cols-3">
+    <footer class="mt-16 border-t-2 border-verde-600/80 bg-amarelo-50">
+      <div class="mx-auto max-w-5xl px-4 py-10 text-sm text-stone-700">
+        <div class="grid gap-8 md:grid-cols-3">
           <div>
-            <p class="font-semibold text-slate-900">Projeto SOTAQUE</p>
-            <p class="mt-1">Dataset aberto de vozes em português brasileiro.</p>
-            <p class="mt-1">Licença do dataset: CDLA-Permissive-2.0.</p>
+            <p class="flex items-center gap-2 font-semibold text-stone-900">
+              <span class="inline-block h-4 w-4 rounded-sm bg-verde-600"></span>
+              Projeto SOTAQUE
+            </p>
+            <p class="mt-2 text-stone-600">Dataset aberto de vozes em português brasileiro.</p>
+            <p class="mt-1 text-stone-600">Licença do dataset: CDLA-Permissive-2.0.</p>
           </div>
           <div>
-            <p class="font-semibold text-slate-900">Contato</p>
-            <p class="mt-1">
-              <a href="mailto:contato@fabriciocarraro.com.br" class="text-brand-700 hover:underline">
+            <p class="font-semibold text-stone-900">Contato</p>
+            <p class="mt-2">
+              <a href="mailto:contato@fabriciocarraro.com.br" class="text-verde-700 hover:text-verde-800 hover:underline">
                 contato@fabriciocarraro.com.br
               </a>
             </p>
-            <p class="mt-1">Privacidade, direitos e revogação.</p>
+            <p class="mt-1 text-stone-600">Privacidade, direitos e revogação.</p>
           </div>
           <div>
-            <p class="font-semibold text-slate-900">Código-fonte</p>
-            <p class="mt-1">
+            <p class="font-semibold text-stone-900">Código-fonte</p>
+            <p class="mt-2">
               <a
                 href="https://github.com/fabriciocarraro/projeto-sotaque"
-                class="text-brand-700 hover:underline"
+                class="text-verde-700 hover:text-verde-800 hover:underline"
                 rel="noopener"
-                target="_blank">GitHub</a>
+                target="_blank">github.com/fabriciocarraro/projeto-sotaque</a>
             </p>
           </div>
         </div>
-        <p class="mt-6 text-xs text-slate-500">
+        <p class="mt-8 border-t border-stone-200 pt-6 text-xs text-stone-500">
           Controlador: Fabrício Carraro (pessoa natural). Este site coleta dados conforme descrito no
-          <a href="/termo" class="underline hover:text-slate-700">Termo de Consentimento e Aviso de Privacidade</a>.
+          <a href="/termo" class="underline hover:text-verde-700">Termo de Consentimento e Aviso de Privacidade</a>.
         </p>
       </div>
     </footer>

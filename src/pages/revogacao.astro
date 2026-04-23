@@ -6,33 +6,33 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "1x0000000
 ---
 
 <Base title="Revogar consentimento — SOTAQUE">
-  <div class="mx-auto max-w-prose px-4 py-12">
-    <h1 class="text-3xl font-bold tracking-tight">Revogar consentimento</h1>
-    <p class="mt-4 text-slate-700">
+  <div class="mx-auto max-w-prose px-4 py-14">
+    <h1 class="text-3xl font-bold tracking-tight text-stone-900 md:text-4xl">Revogar consentimento</h1>
+    <p class="mt-4 leading-relaxed text-stone-700">
       Você pode pedir a revogação do seu consentimento a qualquer momento. Ao receber seu pedido,
       o Projeto cessará novos usos baseados em consentimento, registrará a revogação e removerá a
       contribuição dos canais sob controle do Projeto sempre que tecnicamente viável.
     </p>
 
-    <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-      <p class="font-semibold">Limitações importantes</p>
-      <p class="mt-1">
+    <div class="mt-6 rounded-xl border-l-4 border-verde-600 bg-white p-5 text-sm text-stone-700 shadow-sm">
+      <p class="font-semibold text-stone-900">Limitações importantes</p>
+      <p class="mt-2 leading-relaxed">
         A retirada do consentimento não garante a exclusão total de cópias já redistribuídas por
         terceiros nem a reversão integral de efeitos produzidos por treinamento de modelos já
         concluído e fora do controle do Projeto. Registros necessários à prova do consentimento
         e à defesa de direitos serão mantidos conforme as Seções 4.2 e 7 do
-        <a href="/termo" class="underline" target="_blank" rel="noopener">Termo</a>.
+        <a href="/termo" class="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800" target="_blank" rel="noopener">Termo</a>.
       </p>
     </div>
 
-    <div class="mt-8">
+    <div class="mt-10 rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
       <FormularioRevogacao client:load turnstileSiteKey={turnstileSiteKey} />
     </div>
 
-    <div class="mt-10 rounded-md border border-slate-200 bg-white p-4 text-sm text-slate-700">
+    <div class="mt-8 rounded-md border border-stone-200 bg-amarelo-50 p-4 text-sm text-stone-700">
       <p>
         Prefere usar e-mail? Escreva para
-        <a href="mailto:contato@fabriciocarraro.com.br" class="text-brand-700 underline"
+        <a href="mailto:contato@fabriciocarraro.com.br" class="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800"
           >contato@fabriciocarraro.com.br</a
         >
         informando o e-mail da contribuição e, se souber, o identificador da submissão.
