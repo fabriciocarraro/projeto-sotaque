@@ -128,8 +128,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         id, pseudonimo, sotaque_declarado, regiao_socializacao, estado_principal,
         cidade_microrregiao, faixa_etaria, genero, tipo_dispositivo, tipo_microfone,
         ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
-        audio_mimetype, audio_nome_original, status_moderacao, criado_em
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?)`,
+        audio_mimetype, audio_nome_original, audio_duracao_segundos, status_moderacao, criado_em
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?)`,
     ).bind(
       id,
       dados.pseudonimo,
@@ -148,6 +148,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       audio.size,
       mimetype,
       audio.name,
+      dados.audio_duracao_segundos ?? null,
       agora,
     );
 

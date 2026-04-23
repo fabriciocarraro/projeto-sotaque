@@ -49,6 +49,15 @@ export const submissaoSchema = z.object({
     z.number().int().min(1).max(5).optional(),
   ),
 
+  audio_duracao_segundos: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+    z
+      .number()
+      .positive("Duração inválida.")
+      .max(10 * 60 * 60, "Duração acima de 10 horas não é aceita.")
+      .optional(),
+  ),
+
   consentimento: consentimentoSchema,
   turnstileToken: z.string().min(1, "Verificação anti-spam ausente."),
 });

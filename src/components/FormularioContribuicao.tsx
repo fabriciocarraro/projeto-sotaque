@@ -89,6 +89,35 @@ function extensaoValida(nome: string): boolean {
   return EXTENSOES_PERMITIDAS.some((ext) => lower.endsWith(ext));
 }
 
+function medirDuracaoAudio(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const audio = document.createElement("audio");
+    audio.preload = "metadata";
+    const cleanup = () => {
+      URL.revokeObjectURL(url);
+      audio.src = "";
+    };
+    audio.addEventListener("loadedmetadata", () => {
+      const d = audio.duration;
+      cleanup();
+      resolve(Number.isFinite(d) && d > 0 ? d : null);
+    });
+    audio.addEventListener("error", () => {
+      cleanup();
+      resolve(null);
+    });
+    audio.src = url;
+  });
+}
+
+function formatarDuracao(segundos: number): string {
+  if (segundos < 60) return `${Math.round(segundos)}s`;
+  const m = Math.floor(segundos / 60);
+  const s = Math.round(segundos % 60);
+  return `${m}min ${s.toString().padStart(2, "0")}s`;
+}
+
 export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
   const [pseudonimo, setPseudonimo] = useState("");
   const [email, setEmail] = useState("");
@@ -107,6 +136,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
   const [qualidade, setQualidade] = useState("");
 
   const [arquivo, setArquivo] = useState<File | null>(null);
+  const [duracao, setDuracao] = useState<number | null>(null);
   const [erroArquivo, setErroArquivo] = useState<string | null>(null);
 
   const [consent, setConsent] = useState<Consent>(ESTADO_CONSENT_INICIAL);
@@ -139,9 +169,10 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
   const podeEnviar =
     obrigatoriosOk && todosConsentimentos && !!turnstileToken && !enviando;
 
-  function onArquivoChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function onArquivoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] ?? null;
     setErroArquivo(null);
+    setDuracao(null);
     if (!f) {
       setArquivo(null);
       return;
@@ -165,6 +196,8 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       }
     }
     setArquivo(f);
+    const d = await medirDuracaoAudio(f);
+    setDuracao(d);
   }
 
   async function onSubmit(e: FormEvent) {
@@ -185,6 +218,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       tipo_microfone: microfone || undefined,
       ambiente_gravacao: ambiente || undefined,
       autoavaliacao_qualidade: qualidade ? Number(qualidade) : undefined,
+      audio_duracao_segundos: duracao ?? undefined,
       consentimento: consent,
       turnstileToken,
     };
@@ -536,7 +570,10 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
             </svg>
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">{arquivo.name}</p>
-              <p className="text-xs text-stone-600">{formatarTamanho(arquivo.size)}</p>
+              <p className="text-xs text-stone-600">
+                {formatarTamanho(arquivo.size)}
+                {duracao !== null && <> · {formatarDuracao(duracao)}</>}
+              </p>
             </div>
           </div>
         )}
