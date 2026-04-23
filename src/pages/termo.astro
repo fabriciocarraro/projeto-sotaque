@@ -1,0 +1,47 @@
+---
+import Base from "../layouts/Base.astro";
+import { getEntry } from "astro:content";
+
+const termo = await getEntry("termo", "v1");
+if (!termo) throw new Error("Termo v1 não encontrado.");
+const { Content } = await termo.render();
+---
+
+<Base title={`${termo.data.titulo} — SOTAQUE`}>
+  <article class="mx-auto max-w-prose px-4 py-12">
+    <header class="border-b border-slate-200 pb-6">
+      <p class="text-xs font-semibold uppercase tracking-wider text-brand-700">
+        Versão {termo.data.versao}
+      </p>
+      <h1 class="mt-2 text-3xl font-bold tracking-tight">{termo.data.titulo}</h1>
+      <p class="mt-2 text-sm text-slate-600">{termo.data.subtitulo}</p>
+    </header>
+
+    <div
+      class="prose prose-slate mt-8 max-w-none
+             prose-headings:tracking-tight
+             prose-h2:mt-10 prose-h2:text-2xl
+             prose-h3:mt-6 prose-h3:text-lg
+             prose-a:text-brand-700 hover:prose-a:text-brand-900
+             prose-strong:text-slate-900
+             prose-li:my-0.5"
+    >
+      <Content />
+    </div>
+
+    <div class="mt-10 rounded-lg border border-slate-200 bg-white p-5 text-sm text-slate-700">
+      <p>
+        Para dúvidas sobre privacidade, exercício de direitos ou revogação de consentimento,
+        escreva para
+        <a
+          href="mailto:contato@fabriciocarraro.com.br"
+          class="text-brand-700 underline">contato@fabriciocarraro.com.br</a
+        >.
+      </p>
+      <p class="mt-2">
+        Também é possível pedir revogação pelo
+        <a href="/revogacao" class="text-brand-700 underline">formulário de revogação</a>.
+      </p>
+    </div>
+  </article>
+</Base>

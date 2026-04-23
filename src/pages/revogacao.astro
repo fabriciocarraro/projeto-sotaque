@@ -1,0 +1,42 @@
+---
+import Base from "../layouts/Base.astro";
+import FormularioRevogacao from "../components/FormularioRevogacao.tsx";
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
+---
+
+<Base title="Revogar consentimento — SOTAQUE">
+  <div class="mx-auto max-w-prose px-4 py-12">
+    <h1 class="text-3xl font-bold tracking-tight">Revogar consentimento</h1>
+    <p class="mt-4 text-slate-700">
+      Você pode pedir a revogação do seu consentimento a qualquer momento. Ao receber seu pedido,
+      o Projeto cessará novos usos baseados em consentimento, registrará a revogação e removerá a
+      contribuição dos canais sob controle do Projeto sempre que tecnicamente viável.
+    </p>
+
+    <div class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <p class="font-semibold">Limitações importantes</p>
+      <p class="mt-1">
+        A retirada do consentimento não garante a exclusão total de cópias já redistribuídas por
+        terceiros nem a reversão integral de efeitos produzidos por treinamento de modelos já
+        concluído e fora do controle do Projeto. Registros necessários à prova do consentimento
+        e à defesa de direitos serão mantidos conforme as Seções 4.2 e 7 do
+        <a href="/termo" class="underline" target="_blank" rel="noopener">Termo</a>.
+      </p>
+    </div>
+
+    <div class="mt-8">
+      <FormularioRevogacao client:load turnstileSiteKey={turnstileSiteKey} />
+    </div>
+
+    <div class="mt-10 rounded-md border border-slate-200 bg-white p-4 text-sm text-slate-700">
+      <p>
+        Prefere usar e-mail? Escreva para
+        <a href="mailto:contato@fabriciocarraro.com.br" class="text-brand-700 underline"
+          >contato@fabriciocarraro.com.br</a
+        >
+        informando o e-mail da contribuição e, se souber, o identificador da submissão.
+      </p>
+    </div>
+  </div>
+</Base>

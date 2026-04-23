@@ -1,0 +1,20 @@
+name = "sotaque"
+compatibility_date = "2025-04-01"
+pages_build_output_dir = "./dist"
+
+[vars]
+TERMO_VERSAO = "1.0"
+
+# Preencher com a secret do Turnstile via:
+#   wrangler pages secret put TURNSTILE_SECRET_KEY
+# (nunca commitar a secret aqui)
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sotaque-db"
+database_id = "PREENCHER_APOS_CRIAR_D1"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "AUDIO_BUCKET"
+bucket_name = "sotaque-audios"

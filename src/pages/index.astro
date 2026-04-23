@@ -1,0 +1,96 @@
+---
+import Base from "../layouts/Base.astro";
+import Card from "../components/Card.astro";
+---
+
+<Base title="SOTAQUE — Dataset aberto de vozes em português brasileiro">
+  <section class="bg-gradient-to-b from-white to-slate-50">
+    <div class="mx-auto max-w-5xl px-4 py-16 md:py-24">
+      <p class="text-xs font-semibold uppercase tracking-wider text-brand-700">
+        Speech-Oriented Training Audio for Quality Understanding and Expression
+      </p>
+      <h1 class="mt-2 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
+        Sua voz, no dataset aberto do português brasileiro.
+      </h1>
+      <p class="mt-5 max-w-2xl text-lg text-slate-600">
+        O SOTAQUE é um projeto voluntário e open source para construir uma base pública de vozes
+        em português do Brasil, representando a diversidade de sotaques do país. O resultado é
+        publicado sob licença aberta (CDLA-Permissive-2.0) e pode ser usado para treinar e avaliar
+        tecnologias de fala, como TTS e reconhecimento de voz.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a
+          href="/contribuir"
+          class="inline-flex items-center rounded-md bg-brand-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-brand-700"
+          >Contribuir com minha voz</a
+        >
+        <a
+          href="/sobre"
+          class="inline-flex items-center rounded-md border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
+          >Sobre o projeto</a
+        >
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-5xl px-4 py-12">
+    <div class="grid gap-6 md:grid-cols-3">
+      <Card titulo="Para qualquer brasileiro adulto">
+        A participação é aberta a qualquer pessoa maior de 18 anos, localizada no Brasil, que
+        queira doar uma gravação da própria voz.
+      </Card>
+      <Card titulo="Para todos os sotaques">
+        Caipira, gaúcho, nordestino, paulistano, carioca, mineiro, baiano e muitos outros — o
+        projeto só faz sentido com diversidade regional.
+      </Card>
+      <Card titulo="Dataset aberto e reutilizável">
+        As gravações e metadados permitidos são publicados sob licença CDLA-Permissive-2.0 e podem
+        ser usados em pesquisa, ensino e tecnologias de fala.
+      </Card>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="mx-auto max-w-3xl px-4 py-12">
+      <h2 class="text-2xl font-semibold">Como funciona</h2>
+      <ol class="mt-6 space-y-4 text-slate-700">
+        <li class="flex gap-3">
+          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">1</span>
+          <span>
+            Leia o <a href="/termo" class="text-brand-700 underline">Termo de Consentimento e Aviso de Privacidade</a>.
+          </span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">2</span>
+          <span>Preencha o formulário com pseudônimo, e-mail e algumas informações sobre seu sotaque e sua gravação.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">3</span>
+          <span>Envie o arquivo de áudio (até 100 MB, formatos comuns como WAV, MP3, FLAC, M4A, OGG).</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white">4</span>
+          <span>Marque as confirmações de consentimento e envie. Sua contribuição passa por curadoria antes de entrar no dataset.</span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-3xl px-4 py-12">
+    <div class="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+      <p class="font-semibold">Antes de contribuir, o essencial:</p>
+      <p class="mt-2">
+        Ao enviar sua voz ao Projeto SOTAQUE, você concorda que suas gravações, transcrições e
+        determinados metadados possam ser curados, publicados em dataset aberto e usados para
+        treinar e avaliar tecnologias de fala, inclusive TTS. A participação é voluntária e restrita
+        a maiores de 18 anos localizados no Brasil no momento da contribuição. Você pode retirar
+        seu consentimento para usos futuros sob controle do Projeto, mas isso pode não apagar
+        cópias já publicadas, redistribuídas ou incorporadas a modelos já treinados.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // noop — placeholder para eventual telemetria anônima
+</script>

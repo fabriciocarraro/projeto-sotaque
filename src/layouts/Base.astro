@@ -1,0 +1,76 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = "Projeto SOTAQUE — dataset aberto de vozes em português brasileiro." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://rsms.me/" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-slate-50 text-slate-900 antialiased flex flex-col">
+    <header class="border-b border-slate-200 bg-white">
+      <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
+        <a href="/" class="flex items-center gap-2 font-semibold tracking-tight">
+          <span class="inline-block h-6 w-6 rounded-sm bg-brand-600"></span>
+          <span>SOTAQUE</span>
+        </a>
+        <nav class="hidden gap-6 text-sm text-slate-600 md:flex">
+          <a href="/" class="hover:text-slate-900">Início</a>
+          <a href="/sobre" class="hover:text-slate-900">Sobre</a>
+          <a href="/termo" class="hover:text-slate-900">Termo</a>
+          <a href="/contribuir" class="font-medium text-brand-700 hover:text-brand-900">Contribuir</a>
+          <a href="/revogacao" class="hover:text-slate-900">Revogar consentimento</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto max-w-5xl px-4 py-8 text-sm text-slate-600">
+        <div class="grid gap-4 md:grid-cols-3">
+          <div>
+            <p class="font-semibold text-slate-900">Projeto SOTAQUE</p>
+            <p class="mt-1">Dataset aberto de vozes em português brasileiro.</p>
+            <p class="mt-1">Licença do dataset: CDLA-Permissive-2.0.</p>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-900">Contato</p>
+            <p class="mt-1">
+              <a href="mailto:contato@fabriciocarraro.com.br" class="text-brand-700 hover:underline">
+                contato@fabriciocarraro.com.br
+              </a>
+            </p>
+            <p class="mt-1">Privacidade, direitos e revogação.</p>
+          </div>
+          <div>
+            <p class="font-semibold text-slate-900">Código-fonte</p>
+            <p class="mt-1">
+              <a
+                href="https://github.com/fabriciocarraro/projeto-sotaque"
+                class="text-brand-700 hover:underline"
+                rel="noopener"
+                target="_blank">GitHub</a>
+            </p>
+          </div>
+        </div>
+        <p class="mt-6 text-xs text-slate-500">
+          Controlador: Fabrício Carraro (pessoa natural). Este site coleta dados conforme descrito no
+          <a href="/termo" class="underline hover:text-slate-700">Termo de Consentimento e Aviso de Privacidade</a>.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
