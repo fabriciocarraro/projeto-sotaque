@@ -6,7 +6,7 @@ import Contador from "../components/Contador.tsx";
 
 <Base title="SOTAQUE — Dataset aberto de vozes em português brasileiro">
   <div class="border-b border-verde-600/20 bg-verde-50/60">
-    <div class="mx-auto flex max-w-5xl items-center gap-2 px-4 py-2.5">
+    <div class="mx-auto flex max-w-5xl items-center justify-center gap-2 px-4 py-2.5 text-center">
       <span class="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-verde-600 motion-safe:animate-pulse" aria-hidden></span>
       <Contador client:load />
     </div>
@@ -18,9 +18,9 @@ import Contador from "../components/Contador.tsx";
       <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-verde-700">
         SOTAQUE: Speech-Oriented Training Audio for Quality Understanding and Expression
       </p>
-      <h1 class="mt-5 text-4xl font-bold leading-tight tracking-tight text-verde-900 md:text-5xl">
-        Sua voz, no dataset aberto do<br />
-        <span class="bg-amarelo-300/80 px-2 py-0.5">português brasileiro.</span>
+      <h1 class="mt-5 text-4xl font-bold tracking-tight text-verde-900 md:text-5xl" style="line-height: 1.35;">
+        <span>Sua voz, no dataset aberto do</span>
+        <span class="mt-3 inline-block bg-amarelo-300/80 px-2 py-0.5">português brasileiro.</span>
       </h1>
       <p class="mt-5 max-w-2xl text-lg text-verde-900">
         O SOTAQUE é um projeto voluntário e open source para construir uma base pública de vozes

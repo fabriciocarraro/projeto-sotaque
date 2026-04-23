@@ -118,7 +118,7 @@ export default function FormularioRevogacao({ turnstileSiteKey }: Props) {
           className={`mt-1 block w-full rounded-md border px-3 py-2 font-mono text-xs shadow-sm focus:outline-none focus:ring-2 focus:ring-verde-500 ${erros["submission_id"] ? "border-red-400" : "border-stone-300"}`}
         />
         {erros["submission_id"] && <p className="mt-1 text-xs text-red-600">{erros["submission_id"]}</p>}
-        <p className="mt-1 text-xs text-stone-500">
+        <p className="mt-1 text-xs text-verde-800/80">
           Se não souber, deixe em branco. Vamos localizar suas contribuições pelo e-mail.
         </p>
       </div>
@@ -135,7 +135,7 @@ export default function FormularioRevogacao({ turnstileSiteKey }: Props) {
           rows={4}
           className="mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-verde-500"
         />
-        <p className="mt-1 text-xs text-stone-500">
+        <p className="mt-1 text-xs text-verde-800/80">
           Opcional. Ajuda a processar o pedido mais rápido, mas não é obrigatório informar.
         </p>
       </div>

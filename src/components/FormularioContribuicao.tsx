@@ -282,7 +282,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
           <h2 className="text-lg font-semibold text-verde-900">1. Identificação</h2>
-          <p className="mt-1 text-sm text-stone-600">Seus dados de contato e pseudônimo público.</p>
+          <p className="mt-1 text-sm text-verde-800">Seus dados de contato e pseudônimo público.</p>
         </div>
         <Campo
           id="pseudonimo"
@@ -324,7 +324,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
           <h2 className="text-lg font-semibold text-verde-900">2. Perfil linguístico</h2>
-          <p className="mt-1 text-sm text-stone-600">Ajude a caracterizar o seu sotaque e origem.</p>
+          <p className="mt-1 text-sm text-verde-800">Ajude a caracterizar o seu sotaque e origem.</p>
         </div>
 
         <Campo
@@ -408,7 +408,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
           <h2 className="text-lg font-semibold text-verde-900">3. Perfil demográfico</h2>
-          <p className="mt-1 text-sm text-stone-600">Informações autoidentificadas — o gênero é opcional.</p>
+          <p className="mt-1 text-sm text-verde-800">Informações autoidentificadas — o gênero é opcional.</p>
         </div>
         <Campo
           id="faixa"
@@ -453,7 +453,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
           <h2 className="text-lg font-semibold text-verde-900">4. Sobre a gravação</h2>
-          <p className="mt-1 text-sm text-stone-600">
+          <p className="mt-1 text-sm text-verde-800">
             Campos opcionais que nos ajudam a entender a diversidade de equipamentos e ambientes.
           </p>
         </div>
@@ -524,7 +524,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
               <button
                 type="button"
                 onClick={() => setQualidade("")}
-                className="text-xs text-stone-500 underline hover:text-verde-900">
+                className="text-xs text-verde-800/80 underline hover:text-verde-900">
                 limpar
               </button>
             )}
@@ -536,7 +536,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
           <h2 className="text-lg font-semibold text-verde-900">5. Arquivo de áudio</h2>
-          <p className="mt-1 text-sm text-stone-600">
+          <p className="mt-1 text-sm text-verde-800">
             Envie um arquivo de até {formatarTamanho(AUDIO_TAMANHO_MAX)}. Formatos aceitos:{" "}
             {EXTENSOES_PERMITIDAS.join(", ")}.
           </p>
@@ -551,7 +551,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
           <span className="text-sm font-medium text-verde-900">
             {arquivo ? "Trocar arquivo" : "Clique para selecionar o arquivo"}
           </span>
-          <span className="text-xs text-stone-500">
+          <span className="text-xs text-verde-800/80">
             Até {formatarTamanho(AUDIO_TAMANHO_MAX)} · {EXTENSOES_PERMITIDAS.join(", ")}
           </span>
           <input
@@ -570,7 +570,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
             </svg>
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">{arquivo.name}</p>
-              <p className="text-xs text-stone-600">
+              <p className="text-xs text-verde-800">
                 {formatarTamanho(arquivo.size)}
                 {duracao !== null && <> · {formatarDuracao(duracao)}</>}
               </p>
@@ -584,7 +584,7 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
           <h2 className="text-lg font-semibold text-verde-900">6. Consentimento</h2>
-          <p className="mt-1 text-sm text-stone-600">
+          <p className="mt-1 text-sm text-verde-800">
             Leia o{" "}
             <a href="/termo" className="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800" target="_blank" rel="noopener">
               Termo de Consentimento e Aviso de Privacidade
@@ -641,12 +641,12 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
         <button
           type="submit"
           disabled={!podeEnviar}
-          className="inline-flex items-center justify-center rounded-md bg-verde-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-verde-700 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500"
+          className="inline-flex items-center justify-center rounded-md bg-verde-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-verde-700 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-verde-800/80"
         >
           {enviando ? "Enviando…" : "Enviar contribuição"}
         </button>
         {!podeEnviar && !enviando && (
-          <p className="text-xs text-stone-500">
+          <p className="text-xs text-verde-800/80">
             {!obrigatoriosOk
               ? "Preencha os campos obrigatórios e selecione o arquivo."
               : !todosConsentimentos
@@ -677,7 +677,7 @@ function Campo(props: {
       </label>
       <div className="mt-1.5">{props.children}</div>
       {props.ajuda && !props.erro && (
-        <p className="mt-1.5 text-xs text-stone-500">{props.ajuda}</p>
+        <p className="mt-1.5 text-xs text-verde-800/80">{props.ajuda}</p>
       )}
       {props.erro && <p className="mt-1.5 text-xs font-medium text-red-600">{props.erro}</p>}
     </div>
