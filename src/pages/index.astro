@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import Card from "../components/Card.astro";
 import Contador from "../components/Contador.tsx";
+import BarraMeta from "../components/BarraMeta.tsx";
 ---
 
 <Base title="SOTAQUE — Dataset aberto de vozes em português brasileiro">
@@ -15,7 +16,7 @@ import Contador from "../components/Contador.tsx";
   <section class="relative overflow-hidden">
     <div class="absolute inset-0 -z-10 bg-gradient-to-b from-amarelo-200/60 via-amarelo-100 to-amarelo-100"></div>
     <div class="mx-auto max-w-5xl px-4 py-20 md:py-28">
-      <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-verde-700">
+      <p class="text-[13px] font-semibold uppercase tracking-[0.18em] text-verde-700">
         SOTAQUE: Speech-Oriented Training Audio for Quality Understanding and Expression
       </p>
       <h1 class="mt-5 text-4xl font-bold tracking-tight text-verde-900 md:text-5xl" style="line-height: 1.35;">
@@ -42,6 +43,8 @@ import Contador from "../components/Contador.tsx";
       </div>
     </div>
   </section>
+
+  <BarraMeta client:load />
 
   <section class="mx-auto max-w-5xl px-4 py-14">
     <div class="grid gap-6 md:grid-cols-3">

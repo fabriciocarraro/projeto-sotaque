@@ -97,7 +97,7 @@ export default function Contador() {
       <strong className="font-semibold text-verde-700 tabular-nums">
         {n.toLocaleString("pt-BR")} {plural}
       </strong>
-      .
+      {" "}— meta: <strong className="font-semibold text-verde-700">10.000 horas</strong>.
     </p>
   );
 }
