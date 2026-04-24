@@ -67,6 +67,7 @@ const CONSENT_TEXTOS: Array<{ id: keyof Consent; texto: string }> = [
 
 type Props = {
   turnstileSiteKey: string;
+  children?: React.ReactNode;
 };
 
 const ESTADO_CONSENT_INICIAL: Consent = {
@@ -119,7 +120,7 @@ function formatarDuracao(segundos: number): string {
   return `${m}min ${s.toString().padStart(2, "0")}s`;
 }
 
-export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
+export default function FormularioContribuicao({ turnstileSiteKey, children }: Props) {
   const [pseudonimo, setPseudonimo] = useState("");
   const [email, setEmail] = useState("");
 
@@ -360,6 +361,19 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
           />
         </Campo>
       </section>
+
+      {/* Mapa de dialetos (referência para a próxima seção) */}
+      {children && (
+        <section className="space-y-3 border-b border-stone-200 pb-8">
+          <div>
+            <h3 className="text-sm font-semibold text-verde-900">Dialetos do português brasileiro</h3>
+            <p className="mt-1 text-xs text-verde-800">
+              Use a imagem como referência ao escolher seu sotaque na próxima seção.
+            </p>
+          </div>
+          {children}
+        </section>
+      )}
 
       {/* Seção 2 */}
       <section className="space-y-4 border-b border-stone-200 pb-8">
