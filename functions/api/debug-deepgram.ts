@@ -23,6 +23,7 @@ async function transcreverComGemini(
   buffer: ArrayBuffer,
   mimeType: string,
   apiKey: string,
+  model: string,
 ): Promise<{ ok: boolean; texto?: string; erro?: string; body?: string }> {
   if (!apiKey) return { ok: false, erro: "GEMINI_API_KEY não configurada" };
   if (buffer.byteLength > 20 * 1024 * 1024) {
@@ -47,7 +48,7 @@ async function transcreverComGemini(
   };
   try {
     const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -111,10 +112,16 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         });
       }
 
-      const result = await transcreverComGemini(buffer, mimetype, env.GEMINI_API_KEY ?? "");
+      const geminiModel = url.searchParams.get("model") ?? "gemini-2.5-flash";
+      const result = await transcreverComGemini(
+        buffer,
+        mimetype,
+        env.GEMINI_API_KEY ?? "",
+        geminiModel,
+      );
       return json({
         sid: retrySid,
-        provider: "gemini:2.5-flash",
+        provider: `gemini:${geminiModel}`,
         ...result,
         aviso: "esta resposta NÃO atualiza o D1 (apenas comparação)",
       });
@@ -130,8 +137,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const audioUrl = `${origin}/api/audio-privado/${audioToken}`;
     const callbackUrl = `${origin}/api/deepgram-callback/${callbackToken}`;
 
+    const deepgramModel = url.searchParams.get("model") ?? "nova-3";
     const params = new URLSearchParams({
-      model: "nova-3",
+      model: deepgramModel,
       language: "pt-BR",
       punctuate: "true",
       callback: callbackUrl,
