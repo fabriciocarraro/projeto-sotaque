@@ -4,10 +4,12 @@ pages_build_output_dir = "./dist"
 
 [vars]
 TERMO_VERSAO = "1.0"
+PUBLIC_TURNSTILE_SITE_KEY = "0x4AAAAAADBerp_JVxVHVDLK"
 
-# Preencher com a secret do Turnstile via:
-#   wrangler pages secret put TURNSTILE_SECRET_KEY
-# (nunca commitar a secret aqui)
+# Secrets (TURNSTILE_SECRET_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY,
+# WHATSAPP_ACCESS_TOKEN, WHATSAPP_APP_SECRET, WHATSAPP_VERIFY_TOKEN,
+# WHATSAPP_PHONE_NUMBER_ID) são gerenciadas no dashboard do Cloudflare
+# Pages (Settings → Environment variables → encrypt).
 
 [[d1_databases]]
 binding = "DB"
