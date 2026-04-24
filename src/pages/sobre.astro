@@ -12,46 +12,89 @@ import Base from "../layouts/Base.astro";
     </h1>
 
     <p class="mt-6 text-lg leading-relaxed text-verde-900">
-      SOTAQUE (Speech-Oriented Training Audio for Quality Understanding and Expression) é uma
-      iniciativa voluntária e open source para construir um dataset aberto de vozes em português
-      do Brasil, com foco na diversidade de sotaques regionais.
+      O SOTAQUE é uma iniciativa voluntária para construir um dataset aberto de vozes em português
+      brasileiro, com foco na diversidade de sotaques regionais. Inspirado no
+      <a
+        href="https://commonvoice.mozilla.org/"
+        rel="noopener"
+        target="_blank"
+        class="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800"
+        >Mozilla Common Voice</a
+      >, a referência mundial em datasets abertos de voz, e adaptado para a realidade do português
+      do Brasil.
     </p>
 
     <h2 class="mt-12 text-xl font-semibold text-verde-900">Por que esse projeto?</h2>
     <p class="mt-3 leading-relaxed text-verde-900">
-      Boa parte dos datasets de fala disponíveis hoje está em inglês ou em variantes europeias do
-      português. Isso limita a qualidade de tecnologias como síntese de voz (TTS), reconhecimento
-      de fala (ASR) e avaliação de modelos quando aplicados ao português brasileiro — especialmente
-      fora dos sotaques mais representados na mídia. O SOTAQUE existe para contribuir com uma
-      base aberta, diversa e documentada para pesquisa, ensino e desenvolvimento.
+      Boa parte das tecnologias de fala que usamos hoje foi treinada com vozes em inglês ou em
+      português europeu. Quando ouvem um sotaque caipira, baiano ou nortista, esses sistemas erram
+      mais. Isso aparece no dia a dia: pior reconhecimento de voz, transcrições incorretas,
+      assistentes que pedem pra repetir.
+    </p>
+    <p class="mt-3 leading-relaxed text-verde-900">
+      A causa é simples. Faltam vozes brasileiras nos dados que treinam essas tecnologias, e quando
+      existem, costumam ser apenas dos sotaques mais representados na mídia (paulistano, carioca).
+      O SOTAQUE existe para corrigir esse desequilíbrio, com uma base aberta, diversa e documentada
+      que qualquer pessoa pode usar.
     </p>
 
-    <h2 class="mt-10 text-xl font-semibold text-verde-900">Como as contribuições são usadas</h2>
+    <h2 class="mt-10 text-xl font-semibold text-verde-900">Nossas metas</h2>
     <p class="mt-3 leading-relaxed text-verde-900">
-      As gravações, transcrições e metadados permitidos são curados e publicados sob a licença
-      <strong class="font-semibold text-verde-900">CDLA-Permissive-2.0</strong>, que permite uso
-      amplo, inclusive comercial, desde que observados os termos da licença. Os dados podem ser
-      utilizados para treinar, avaliar, comparar e melhorar modelos de fala — incluindo TTS.
+      O Projeto tem duas metas explícitas de coleta:
     </p>
+    <ul class="mt-3 space-y-2 leading-relaxed text-verde-900">
+      <li class="pl-2">
+        <strong class="font-semibold text-verde-900">Meta inicial: 1.000 horas</strong> de áudio
+        coletado e curado, suficiente para treinar e avaliar modelos brasileiros pequenos a médios.
+      </li>
+      <li class="pl-2">
+        <strong class="font-semibold text-verde-900">Meta final: 10.000 horas</strong>, escala em
+        que o dataset passa a ser referência aberta para toda a comunidade de fala em português.
+      </li>
+    </ul>
     <p class="mt-3 leading-relaxed text-verde-900">
-      Os dados de contato (como e-mail) e as evidências de consentimento ficam em base separada e
-      <strong class="font-semibold text-verde-900">não são publicados</strong>. Somente o
-      pseudônimo público e os metadados permitidos acompanham o áudio no dataset.
+      O progresso atual aparece no contador no topo do site.
+    </p>
+
+    <h2 class="mt-10 text-xl font-semibold text-verde-900">O que é publicado</h2>
+    <p class="mt-3 leading-relaxed text-verde-900">
+      As gravações, transcrições e metadados que você autorizar (sotaque declarado, região, faixa
+      etária, gênero, escolaridade) serão publicados no
+      <a
+        href="https://huggingface.co/"
+        rel="noopener"
+        target="_blank"
+        class="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800"
+        >Hugging Face</a
+      >
+      sob a licença
+      <strong class="font-semibold text-verde-900">CDLA-Permissive-2.0</strong>, que permite uso
+      amplo, inclusive comercial, desde que observados os termos. Pesquisadores, startups, escolas
+      e qualquer pessoa interessada podem baixar, usar e redistribuir.
+    </p>
+
+    <h2 class="mt-10 text-xl font-semibold text-verde-900">O que <em>não</em> é publicado</h2>
+    <p class="mt-3 leading-relaxed text-verde-900">
+      Seus dados de contato (como e-mail) e as evidências de consentimento ficam em base separada
+      e <strong class="font-semibold text-verde-900">nunca</strong> aparecem no dataset público.
+      Apenas o pseudônimo público acompanha o áudio.
     </p>
 
     <h2 class="mt-10 text-xl font-semibold text-verde-900">Quem está por trás</h2>
     <p class="mt-3 leading-relaxed text-verde-900">
       O Projeto é mantido por <strong class="font-semibold text-verde-900">Fabrício Carraro</strong>,
-      responsável pelos dados do Projeto. Os detalhes formais estão no
-      <a href="/termo" class="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800">Termo de Consentimento</a>.
+      autor de livros sobre programação e produtor de conteúdo educacional sobre tecnologia, que
+      também é responsável pelo tratamento dos dados coletados. Os detalhes formais sobre
+      responsabilidade, direitos e contato estão no
+      <a href="/termo" class="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800">Termo de Consentimento e Aviso de Privacidade</a>.
     </p>
 
     <h2 class="mt-10 text-xl font-semibold text-verde-900">Como participar</h2>
     <p class="mt-3 leading-relaxed text-verde-900">
-      Se você tem 18 anos ou mais, está no Brasil e quer doar uma gravação da sua própria voz,
-      acesse a página
+      Vá para a página
       <a href="/contribuir" class="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800">Contribuir</a>.
-      Leia o termo antes de enviar.
+      Leva uns 2 minutos: você grava (ou escolhe) um áudio, conta um pouco sobre você, marca o
+      consentimento. Pronto.
     </p>
 
     <h2 class="mt-10 text-xl font-semibold text-verde-900">Contato</h2>
@@ -69,9 +112,9 @@ import Base from "../layouts/Base.astro";
         >Quero contribuir</a
       >
       <a
-        href="/"
+        href="/termo"
         class="inline-flex items-center rounded-md border border-verde-600/60 bg-transparent px-5 py-2.5 text-sm font-semibold text-verde-700 transition hover:bg-verde-600 hover:text-white"
-        >Voltar ao início</a
+        >Ler o Termo de Consentimento</a
       >
     </div>
   </article>
