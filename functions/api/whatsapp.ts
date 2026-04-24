@@ -67,6 +67,7 @@ export const onRequestPost: PagesFunction<WebhookEnv> = async ({ request, env })
   }
 
   const client = new WhatsAppClient(env.WHATSAPP_ACCESS_TOKEN, env.WHATSAPP_PHONE_NUMBER_ID);
+  const origin = new URL(request.url).origin;
 
   for (const entry of payload.entry ?? []) {
     for (const change of entry.changes ?? []) {
@@ -78,7 +79,7 @@ export const onRequestPost: PagesFunction<WebhookEnv> = async ({ request, env })
         }
         try {
           const msg = extrairMensagem(m);
-          await processarMensagem(env, client, m.from, msg, m.id);
+          await processarMensagem(env, client, m.from, msg, m.id, origin);
         } catch (err) {
           console.error("Erro ao processar mensagem WhatsApp:", err);
         }

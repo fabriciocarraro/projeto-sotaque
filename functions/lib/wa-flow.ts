@@ -1,5 +1,7 @@
 import { ESCOLARIDADES, FAIXAS_ETARIAS, GENEROS, SOTAQUES, valoresDe } from "../../src/lib/opcoes";
 import { transcreverAudio } from "./asr";
+import { enviarParaDeepgram } from "./asr-deepgram";
+import { gerarTokenAudio, gerarTokenCallback } from "./tokens";
 import { sha256 } from "./hash";
 import {
   COPY,
@@ -73,6 +75,8 @@ export type Env = {
   WHATSAPP_PHONE_NUMBER_ID: string;
   OPENAI_API_KEY: string;
   ANTHROPIC_API_KEY: string;
+  DEEPGRAM_API_KEY: string;
+  APP_SECRET: string;
 };
 
 function rotuloDe<T extends readonly { valor: string; rotulo: string }[]>(lista: T, valor?: string): string {
@@ -243,18 +247,35 @@ async function enviarConfirmacao(client: WhatsAppClient, phone: string, m: Metad
   ]);
 }
 
-async function persistirContribuicao(env: Env, sessao: Sessao): Promise<string> {
+async function persistirContribuicao(env: Env, sessao: Sessao, origin: string): Promise<string> {
   const m = sessao.metadata;
   const id = crypto.randomUUID();
   const agora = new Date().toISOString();
+
+  const audioToken = await gerarTokenAudio(
+    sessao.audio_key!,
+    Date.now() + 24 * 60 * 60 * 1000,
+    env.APP_SECRET,
+  );
+  const callbackToken = await gerarTokenCallback(id, env.APP_SECRET);
+  const audioUrl = `${origin}/api/audio-privado/${audioToken}`;
+  const callbackUrl = `${origin}/api/deepgram-callback/${callbackToken}`;
+
+  const deepgramRequestId = await enviarParaDeepgram(
+    audioUrl,
+    callbackUrl,
+    env.DEEPGRAM_API_KEY,
+  );
+  const transcricaoStatus = deepgramRequestId ? "pendente" : "falhou";
 
   const stmtSubmission = env.DB.prepare(
     `INSERT INTO submissions (
       id, pseudonimo, sotaque_declarado, regiao_socializacao, estado_principal,
       cidade_microrregiao, faixa_etaria, genero, escolaridade, tipo_dispositivo, tipo_microfone,
       ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
-      audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes, transcricao, status_moderacao, criado_em, source
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'celular', NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, 1, ?, 'pendente', ?, 'whatsapp')`,
+      audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes,
+      transcricao, transcricao_status, deepgram_request_id, status_moderacao, criado_em, source
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'celular', NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, 1, NULL, ?, ?, 'pendente', ?, 'whatsapp')`,
   ).bind(
     id,
     m.pseudonimo!,
@@ -271,7 +292,8 @@ async function persistirContribuicao(env: Env, sessao: Sessao): Promise<string> 
     sessao.audio_mimetype!,
     sessao.audio_nome_original!,
     sessao.audio_duracao_segundos,
-    sessao.audio_transcricao,
+    transcricaoStatus,
+    deepgramRequestId,
     agora,
   );
 
@@ -305,6 +327,7 @@ export async function processarMensagem(
   phone: string,
   msg: MensagemEntrada,
   waMessageId: string | null,
+  origin: string,
 ): Promise<void> {
   let sessao = (await carregarSessao(env.DB, phone)) ?? {
     phone,
@@ -457,7 +480,7 @@ export async function processarMensagem(
     }
     case "aguardando_confirmacao": {
       if (msg.tipo === "button" && msg.id === "confirmar") {
-        const id = await persistirContribuicao(env, sessao);
+        const id = await persistirContribuicao(env, sessao, origin);
         await client.sendText(phone, COPY.sucesso(id));
         await env.DB.prepare("DELETE FROM whatsapp_sessions WHERE phone = ?").bind(phone).run();
         return;
