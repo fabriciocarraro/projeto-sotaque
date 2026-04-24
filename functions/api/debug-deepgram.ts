@@ -56,7 +56,6 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       smart_format: "true",
       punctuate: "true",
       callback: callbackUrl,
-      callback_method: "POST",
     });
 
     const r = await fetch(`https://api.deepgram.com/v1/listen?${params.toString()}`, {

@@ -18,7 +18,6 @@ export async function enviarParaDeepgram(
     smart_format: "true",
     punctuate: "true",
     callback: callbackUrl,
-    callback_method: "POST",
   });
   if (opts.diarize) params.set("diarize", "true");
 
