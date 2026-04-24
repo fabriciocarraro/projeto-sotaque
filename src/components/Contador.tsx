@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-const META_HORAS = 10_000;
+const META_INICIAL_HORAS = 1_000;
+const META_FINAL_HORAS = 10_000;
+const META_INICIAL_PCT = (META_INICIAL_HORAS / META_FINAL_HORAS) * 100;
 
 type Estatisticas = {
   total_contribuicoes: number;
@@ -87,7 +89,7 @@ export default function Contador() {
   const plural = n === 1 ? "contribuição" : "contribuições";
 
   const horasAnimadas = tempoAnimado / 3600;
-  const pct = Math.min(100, (horasAnimadas / META_HORAS) * 100);
+  const pct = Math.min(100, (horasAnimadas / META_FINAL_HORAS) * 100);
   const pctTexto =
     pct < 0.1
       ? "<0,1%"
@@ -97,16 +99,15 @@ export default function Contador() {
     <div className="w-full text-center">
       <p className="inline-flex items-center justify-center gap-2 text-sm text-verde-900">
         <span className="inline-flex h-2 w-2 flex-shrink-0 rounded-full bg-verde-600 motion-safe:animate-pulse" aria-hidden />
-        <span>O Projeto SOTAQUE já reuniu{" "}
-        <strong className="font-semibold text-verde-700 tabular-nums">
-          {valor} {unidade}
-        </strong>{" "}
-        de vozes brasileiras, em{" "}
-        <strong className="font-semibold text-verde-700 tabular-nums">
-          {n.toLocaleString("pt-BR")} {plural}
-        </strong>
-        {" "}— meta:{" "}
-        <strong className="font-semibold text-verde-700">10.000 horas</strong>
+        <span>
+          O Projeto SOTAQUE já reuniu{" "}
+          <strong className="font-semibold text-verde-700 tabular-nums">
+            {valor} {unidade}
+          </strong>{" "}
+          de vozes brasileiras, em{" "}
+          <strong className="font-semibold text-verde-700 tabular-nums">
+            {n.toLocaleString("pt-BR")} {plural}
+          </strong>
         </span>
       </p>
       <div className="mx-auto mt-2.5 max-w-lg">
@@ -117,21 +118,40 @@ export default function Contador() {
             aria-valuenow={Math.round(pct * 10) / 10}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label="Progresso em direção à meta de 10.000 horas"
+            aria-label="Progresso em direção à meta final de 10.000 horas"
           >
             <div
               className="h-full rounded-full bg-verde-600 transition-all duration-700"
               style={{ width: `${pct}%` }}
             />
           </div>
-          {/* marcador de meta */}
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex flex-col items-center">
-            <div className="h-full w-px bg-verde-500/60" />
+          {/* marcador da meta inicial */}
+          <div
+            className="pointer-events-none absolute inset-y-0"
+            style={{ left: `${META_INICIAL_PCT}%` }}
+          >
+            <div className="h-full w-px bg-verde-600/70" />
+          </div>
+          {/* marcador da meta final */}
+          <div className="pointer-events-none absolute inset-y-0 right-0">
+            <div className="h-full w-px bg-verde-600/70" />
           </div>
         </div>
-        <div className="mt-1 flex justify-between text-xs tabular-nums text-verde-800/60">
-          <span>{pctTexto} concluído</span>
-          <span>10.000h</span>
+        <div className="relative mt-1 h-8 text-[10px] tabular-nums text-verde-800/70">
+          <span className="absolute left-0 top-0 text-left text-verde-800/60">
+            {pctTexto} concluído
+          </span>
+          <span
+            className="absolute top-0 -translate-x-1/2 whitespace-nowrap text-center"
+            style={{ left: `${META_INICIAL_PCT}%` }}
+          >
+            <span className="block font-semibold text-verde-800">1.000h</span>
+            <span className="block text-verde-800/60">meta inicial</span>
+          </span>
+          <span className="absolute right-0 top-0 whitespace-nowrap text-right">
+            <span className="block font-semibold text-verde-800">10.000h</span>
+            <span className="block text-verde-800/60">meta final</span>
+          </span>
         </div>
       </div>
     </div>
