@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useRef, type FormEvent } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import GravadorAudio from "./GravadorAudio";
 import {
   AMBIENTES,
   AUDIO_TAMANHO_MAX,
@@ -145,6 +146,7 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [duracao, setDuracao] = useState<number | null>(null);
   const [erroArquivo, setErroArquivo] = useState<string | null>(null);
+  const [modoAudio, setModoAudio] = useState<"gravar" | "upload">("gravar");
 
   const [consent, setConsent] = useState<Consent>(ESTADO_CONSENT_INICIAL);
   const [turnstileToken, setTurnstileToken] = useState<string>("");
@@ -186,6 +188,18 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
 
   const podeEnviar =
     obrigatoriosOk && todosConsentimentos && !!turnstileToken && !enviando;
+
+  function onArquivoGravado(file: File, duracaoGravada: number) {
+    setErroArquivo(null);
+    if (file.size > AUDIO_TAMANHO_MAX) {
+      setArquivo(null);
+      setDuracao(null);
+      setErroArquivo(`Gravação maior que ${formatarTamanho(AUDIO_TAMANHO_MAX)}. Tente um trecho mais curto.`);
+      return;
+    }
+    setArquivo(file);
+    setDuracao(duracaoGravada > 0 ? duracaoGravada : null);
+  }
 
   async function onArquivoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] ?? null;
@@ -692,54 +706,86 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
         <div>
           <h2 className="text-lg font-semibold text-verde-900">6. Arquivo de áudio</h2>
           <p className="mt-1 text-sm text-verde-800">
-            Envie um arquivo de até {formatarTamanho(AUDIO_TAMANHO_MAX)}. Formatos aceitos:{" "}
-            {EXTENSOES_PERMITIDAS.join(", ")}.
+            Grave direto pelo navegador ou envie um arquivo existente (até {formatarTamanho(AUDIO_TAMANHO_MAX)}).
           </p>
         </div>
 
-        {plataforma && (
-          <div className="rounded-lg border border-amarelo-300/60 bg-amarelo-50/70 p-4 text-sm text-verde-900">
-            <p className="flex items-center gap-2 font-medium">
-              <span aria-hidden>💡</span>
-              Quer enviar um áudio do seu WhatsApp?
-            </p>
-            {plataforma === "android" ? (
-              <p className="mt-1.5 text-verde-800">
-                No botão abaixo, toque em <strong>Escolher arquivo</strong> e navegue até{" "}
-                <span className="font-mono text-xs">WhatsApp → Media → WhatsApp Voice Notes</span>.
-              </p>
-            ) : (
-              <p className="mt-1.5 text-verde-800">
-                No iPhone, os áudios do WhatsApp não aparecem direto aqui. Primeiro abra o áudio no{" "}
-                WhatsApp → toque em <strong>Encaminhar</strong> → <strong>Salvar em Arquivos</strong>.
-                Depois volte aqui e selecione pelo botão abaixo.
-              </p>
-            )}
-          </div>
+        <div className="inline-flex rounded-lg border border-stone-200 bg-white p-1 text-sm">
+          <button
+            type="button"
+            onClick={() => setModoAudio("gravar")}
+            className={`rounded-md px-4 py-1.5 font-medium transition ${
+              modoAudio === "gravar"
+                ? "bg-verde-600 text-white shadow-sm"
+                : "text-verde-800 hover:bg-stone-50"
+            }`}
+          >
+            Gravar agora
+          </button>
+          <button
+            type="button"
+            onClick={() => setModoAudio("upload")}
+            className={`rounded-md px-4 py-1.5 font-medium transition ${
+              modoAudio === "upload"
+                ? "bg-verde-600 text-white shadow-sm"
+                : "text-verde-800 hover:bg-stone-50"
+            }`}
+          >
+            Enviar arquivo
+          </button>
+        </div>
+
+        {modoAudio === "gravar" && (
+          <GravadorAudio onGravado={onArquivoGravado} maxBytes={AUDIO_TAMANHO_MAX} />
         )}
 
-        <label
-          htmlFor="audio"
-          className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-stone-300 bg-amarelo-50/50 p-6 text-center transition hover:border-verde-600 hover:bg-verde-50"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-8 w-8 text-verde-700">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7-7-7 7M12 2v14M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2" />
-          </svg>
-          <span className="text-sm font-medium text-verde-900">
-            {arquivo ? "Trocar arquivo" : "Clique para selecionar o arquivo"}
-          </span>
-          <span className="text-xs text-verde-800/80">
-            Até {formatarTamanho(AUDIO_TAMANHO_MAX)} · {EXTENSOES_PERMITIDAS.join(", ")}
-          </span>
-          <input
-            id="audio"
-            type="file"
-            accept={EXTENSOES_PERMITIDAS.join(",")}
-            onChange={onArquivoChange}
-            className="sr-only"
-            required
-          />
-        </label>
+        {modoAudio === "upload" && (
+          <>
+            {plataforma && (
+              <div className="rounded-lg border border-amarelo-300/60 bg-amarelo-50/70 p-4 text-sm text-verde-900">
+                <p className="flex items-center gap-2 font-medium">
+                  <span aria-hidden>💡</span>
+                  Quer enviar um áudio do seu WhatsApp?
+                </p>
+                {plataforma === "android" ? (
+                  <p className="mt-1.5 text-verde-800">
+                    No botão abaixo, toque em <strong>Escolher arquivo</strong> e navegue até{" "}
+                    <span className="font-mono text-xs">WhatsApp → Media → WhatsApp Voice Notes</span>.
+                  </p>
+                ) : (
+                  <p className="mt-1.5 text-verde-800">
+                    No iPhone, os áudios do WhatsApp não aparecem direto aqui. Primeiro abra o áudio no{" "}
+                    WhatsApp → toque em <strong>Encaminhar</strong> → <strong>Salvar em Arquivos</strong>.
+                    Depois volte aqui e selecione pelo botão abaixo.
+                  </p>
+                )}
+              </div>
+            )}
+
+            <label
+              htmlFor="audio"
+              className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-stone-300 bg-amarelo-50/50 p-6 text-center transition hover:border-verde-600 hover:bg-verde-50"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-8 w-8 text-verde-700">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7-7-7 7M12 2v14M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2" />
+              </svg>
+              <span className="text-sm font-medium text-verde-900">
+                {arquivo ? "Trocar arquivo" : "Clique para selecionar o arquivo"}
+              </span>
+              <span className="text-xs text-verde-800/80">
+                Até {formatarTamanho(AUDIO_TAMANHO_MAX)} · {EXTENSOES_PERMITIDAS.join(", ")}
+              </span>
+              <input
+                id="audio"
+                type="file"
+                accept={EXTENSOES_PERMITIDAS.join(",")}
+                onChange={onArquivoChange}
+                className="sr-only"
+              />
+            </label>
+          </>
+        )}
+
         {arquivo && (
           <div className="flex items-center gap-3 rounded-md bg-verde-50 px-4 py-3 text-sm text-verde-900">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 flex-shrink-0 text-verde-700">
