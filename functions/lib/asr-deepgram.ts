@@ -13,9 +13,8 @@ export async function enviarParaDeepgram(
   if (!apiKey) return null;
 
   const params = new URLSearchParams({
-    model: opts.model ?? "nova-2",
+    model: opts.model ?? "nova-3",
     language: opts.language ?? "pt-BR",
-    smart_format: "true",
     punctuate: "true",
     callback: callbackUrl,
   });

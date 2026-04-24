@@ -39,9 +39,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const callbackUrl = `${origin}/api/deepgram-callback/${callbackToken}`;
 
     const params = new URLSearchParams({
-      model: "nova-2",
+      model: "nova-3",
       language: "pt-BR",
-      smart_format: "true",
       punctuate: "true",
       callback: callbackUrl,
     });
@@ -118,9 +117,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const callbackUrl = `${origin}/api/deepgram-callback/${callbackToken}`;
 
     const params = new URLSearchParams({
-      model: "nova-2",
+      model: "nova-3",
       language: "pt-BR",
-      smart_format: "true",
       punctuate: "true",
       callback: callbackUrl,
     });
