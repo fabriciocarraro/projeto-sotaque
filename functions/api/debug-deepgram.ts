@@ -15,6 +15,73 @@ function json(body: unknown, status = 200): Response {
 }
 
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
+  const url = new URL(request.url);
+
+  // Modo "retry": ?retry=<submission_id> dispara Deepgram para uma contribuição existente
+  const retrySid = url.searchParams.get("retry");
+  if (retrySid) {
+    const row = await env.DB.prepare(
+      "SELECT audio_key, transcricao_status FROM submissions WHERE id = ?",
+    )
+      .bind(retrySid)
+      .first<{ audio_key: string | null; transcricao_status: string | null }>();
+    if (!row) return json({ erro: "submission não encontrada", sid: retrySid }, 404);
+    if (!row.audio_key) return json({ erro: "submission sem audio_key" }, 400);
+
+    const origin = new URL(request.url).origin;
+    const audioToken = await gerarTokenAudio(
+      row.audio_key,
+      Date.now() + 24 * 60 * 60 * 1000,
+      env.APP_SECRET,
+    );
+    const callbackToken = await gerarTokenCallback(retrySid, env.APP_SECRET);
+    const audioUrl = `${origin}/api/audio-privado/${audioToken}`;
+    const callbackUrl = `${origin}/api/deepgram-callback/${callbackToken}`;
+
+    const params = new URLSearchParams({
+      model: "nova-2",
+      language: "pt-BR",
+      smart_format: "true",
+      punctuate: "true",
+      callback: callbackUrl,
+    });
+
+    const r = await fetch(`https://api.deepgram.com/v1/listen?${params.toString()}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Token ${env.DEEPGRAM_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url: audioUrl }),
+    });
+    const txt = await r.text();
+    let requestId: string | null = null;
+    try {
+      requestId = (JSON.parse(txt) as { request_id?: string }).request_id ?? null;
+    } catch {
+      // ignore
+    }
+
+    if (requestId) {
+      await env.DB.prepare(
+        `UPDATE submissions SET deepgram_request_id = ?, transcricao_status = 'pendente' WHERE id = ?`,
+      )
+        .bind(requestId, retrySid)
+        .run();
+    }
+
+    return json({
+      sid: retrySid,
+      audio_key: row.audio_key,
+      status_anterior: row.transcricao_status,
+      deepgram_status: r.status,
+      deepgram_ok: r.ok,
+      deepgram_body: txt.slice(0, 500),
+      request_id: requestId,
+      callback_url_gerada: callbackUrl,
+    });
+  }
+
   const diag: Record<string, unknown> = {};
 
   // 1. Existência das envs
