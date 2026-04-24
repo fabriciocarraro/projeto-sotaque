@@ -1,4 +1,6 @@
 ---
+import Contador from "../components/Contador.tsx";
+
 interface Props {
   title: string;
   description?: string;
@@ -61,6 +63,12 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
         <a href="/contribuir" class="md:hidden inline-flex items-center rounded-md bg-verde-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-verde-700">Contribuir</a>
       </div>
     </header>
+
+    <div class="border-b border-verde-600/20 bg-verde-50/60">
+      <div class="mx-auto max-w-5xl px-4 py-3">
+        <Contador client:load />
+      </div>
+    </div>
 
     <main class="flex-1">
       <slot />
