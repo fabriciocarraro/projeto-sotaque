@@ -1,4 +1,5 @@
 import { transcreverAudio } from "../lib/asr";
+import { enviarParaElevenLabs } from "../lib/asr-elevenlabs";
 import { gerarTokenAudio, gerarTokenCallback } from "../lib/tokens";
 
 interface Env {
@@ -120,6 +121,46 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       .first<{ audio_key: string | null; audio_mimetype: string | null; transcricao_status: string | null }>();
     if (!row) return json({ erro: "submission não encontrada", sid: retrySid }, 404);
     if (!row.audio_key) return json({ erro: "submission sem audio_key" }, 400);
+
+    // Modo "elevenlabs-dispatch": reativa o fluxo async real com callback e UPDATE no D1
+    if (provider === "elevenlabs-dispatch") {
+      const origin = new URL(request.url).origin;
+      const audioToken = await gerarTokenAudio(
+        row.audio_key,
+        Date.now() + 24 * 60 * 60 * 1000,
+        env.APP_SECRET,
+      );
+      const audioUrl = `${origin}/api/audio-privado/${audioToken}`;
+
+      const requestId = await enviarParaElevenLabs(audioUrl, env.ELEVENLABS_API_KEY ?? "");
+
+      if (requestId) {
+        await env.DB.prepare(
+          `UPDATE submissions
+           SET transcricao = NULL,
+               transcricao_status = 'pendente',
+               deepgram_request_id = ?,
+               transcricao_provider = 'elevenlabs'
+           WHERE id = ?`,
+        )
+          .bind(requestId, retrySid)
+          .run();
+      } else {
+        await env.DB.prepare(
+          `UPDATE submissions SET transcricao_status = 'falhou' WHERE id = ?`,
+        )
+          .bind(retrySid)
+          .run();
+      }
+
+      return json({
+        sid: retrySid,
+        provider: "elevenlabs-dispatch",
+        request_id: requestId,
+        audio_url: audioUrl,
+        aviso: "dispatch async real. Aguarde o webhook do ElevenLabs preencher a transcrição.",
+      });
+    }
 
     // Providers síncronos (OpenAI, Gemini, ElevenLabs): baixa do R2 e testa sem sobrescrever D1
     if (provider === "openai" || provider === "gemini" || provider === "elevenlabs") {
