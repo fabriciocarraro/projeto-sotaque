@@ -77,22 +77,3 @@ export async function validarTokenAudio(
   }
 }
 
-// Token para /api/deepgram-callback/<token>: apenas assina o submission_id
-export async function gerarTokenCallback(
-  submissionId: string,
-  secret: string,
-): Promise<string> {
-  const sig = await assinar(submissionId, secret);
-  return `${submissionId}.${sig}`;
-}
-
-export async function validarTokenCallback(
-  token: string,
-  secret: string,
-): Promise<string | null> {
-  const parts = token.split(".");
-  if (parts.length !== 2) return null;
-  const [submissionId, sig] = parts;
-  if (!(await verificar(submissionId, sig, secret))) return null;
-  return submissionId;
-}
