@@ -1,4 +1,5 @@
 import { ESCOLARIDADES, FAIXAS_ETARIAS, GENEROS, SOTAQUES, valoresDe } from "../../src/lib/opcoes";
+import { transcreverAudio } from "./asr";
 import { sha256 } from "./hash";
 import {
   COPY,
@@ -54,6 +55,7 @@ export type Sessao = {
   audio_mimetype: string | null;
   audio_duracao_segundos: number | null;
   audio_nome_original: string | null;
+  audio_transcricao: string | null;
 };
 
 export type MensagemEntrada =
@@ -100,6 +102,7 @@ async function carregarSessao(db: D1Database, phone: string): Promise<Sessao | n
       audio_mimetype: string | null;
       audio_duracao_segundos: number | null;
       audio_nome_original: string | null;
+      audio_transcricao: string | null;
     }>();
   if (!row) return null;
   return {
@@ -112,6 +115,7 @@ async function carregarSessao(db: D1Database, phone: string): Promise<Sessao | n
     audio_mimetype: row.audio_mimetype,
     audio_duracao_segundos: row.audio_duracao_segundos,
     audio_nome_original: row.audio_nome_original,
+    audio_transcricao: row.audio_transcricao,
   };
 }
 
@@ -121,9 +125,9 @@ async function salvarSessao(db: D1Database, s: Sessao): Promise<void> {
     .prepare(
       `INSERT INTO whatsapp_sessions (
         phone, state, current_step, metadata_json,
-        audio_key, audio_hash, audio_tamanho, audio_mimetype, audio_duracao_segundos, audio_nome_original,
+        audio_key, audio_hash, audio_tamanho, audio_mimetype, audio_duracao_segundos, audio_nome_original, audio_transcricao,
         criado_em, atualizado_em
-      ) VALUES (?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(phone) DO UPDATE SET
         state = excluded.state,
         metadata_json = excluded.metadata_json,
@@ -133,6 +137,7 @@ async function salvarSessao(db: D1Database, s: Sessao): Promise<void> {
         audio_mimetype = excluded.audio_mimetype,
         audio_duracao_segundos = excluded.audio_duracao_segundos,
         audio_nome_original = excluded.audio_nome_original,
+        audio_transcricao = excluded.audio_transcricao,
         atualizado_em = excluded.atualizado_em`,
     )
     .bind(
@@ -145,6 +150,7 @@ async function salvarSessao(db: D1Database, s: Sessao): Promise<void> {
       s.audio_mimetype,
       s.audio_duracao_segundos,
       s.audio_nome_original,
+      s.audio_transcricao,
       agora,
       agora,
     )
@@ -247,8 +253,8 @@ async function persistirContribuicao(env: Env, sessao: Sessao): Promise<string> 
       id, pseudonimo, sotaque_declarado, regiao_socializacao, estado_principal,
       cidade_microrregiao, faixa_etaria, genero, escolaridade, tipo_dispositivo, tipo_microfone,
       ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
-      audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes, status_moderacao, criado_em, source
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'celular', NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, 1, 'pendente', ?, 'whatsapp')`,
+      audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes, transcricao, status_moderacao, criado_em, source
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'celular', NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, 1, ?, 'pendente', ?, 'whatsapp')`,
   ).bind(
     id,
     m.pseudonimo!,
@@ -265,6 +271,7 @@ async function persistirContribuicao(env: Env, sessao: Sessao): Promise<string> 
     sessao.audio_mimetype!,
     sessao.audio_nome_original!,
     sessao.audio_duracao_segundos,
+    sessao.audio_transcricao,
     agora,
   );
 
@@ -309,6 +316,7 @@ export async function processarMensagem(
     audio_mimetype: null,
     audio_duracao_segundos: null,
     audio_nome_original: null,
+    audio_transcricao: null,
   };
 
   // log da mensagem recebida
@@ -500,6 +508,8 @@ async function processarAudioEntrante(
     customMetadata: { source: "whatsapp", phone },
   });
 
+  const transcricao = await transcreverAudio(buffer, mimeType, env.OPENAI_API_KEY);
+
   // duração: não temos como medir sem decoder — deixa null; curadoria manual depois
   sessao.audio_key = audioKey;
   sessao.audio_hash = hash;
@@ -507,6 +517,7 @@ async function processarAudioEntrante(
   sessao.audio_mimetype = mimeType;
   sessao.audio_duracao_segundos = null;
   sessao.audio_nome_original = `whatsapp-${mediaId}${extensao}`;
+  sessao.audio_transcricao = transcricao;
   sessao.state = "coletando_pseudonimo";
   await salvarSessao(env.DB, sessao);
 

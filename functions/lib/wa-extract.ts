@@ -1,25 +1,7 @@
 import { ESTADOS, SOTAQUES, valoresDe } from "../../src/lib/opcoes";
+import { transcreverAudio } from "./asr";
 
-export async function transcreverAudio(
-  audio: ArrayBuffer,
-  mimeType: string,
-  openaiKey: string,
-): Promise<string | null> {
-  const form = new FormData();
-  form.append("file", new Blob([audio], { type: mimeType }), "audio.ogg");
-  form.append("model", "whisper-1");
-  form.append("language", "pt");
-  form.append("response_format", "text");
-
-  const resp = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${openaiKey}` },
-    body: form,
-  });
-  if (!resp.ok) return null;
-  const txt = (await resp.text()).trim();
-  return txt || null;
-}
+export { transcreverAudio };
 
 type ExtracaoEstado = { uf: string | null };
 
