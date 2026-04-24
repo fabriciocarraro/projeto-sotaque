@@ -35,6 +35,15 @@ function geraId(): string {
   return crypto.randomUUID();
 }
 
+async function invalidarCacheEstatisticas(request: Request): Promise<void> {
+  try {
+    const url = new URL("/api/estatisticas", new URL(request.url).origin).toString();
+    await caches.default.delete(new Request(url, { method: "GET" }));
+  } catch {
+    // best effort
+  }
+}
+
 export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const ct = request.headers.get("content-type") || "";
   if (!ct.includes("multipart/form-data")) {
@@ -201,6 +210,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       500,
     );
   }
+
+  await invalidarCacheEstatisticas(request);
 
   return respostaJson({ id, termo_versao: env.TERMO_VERSAO }, 201);
 };
