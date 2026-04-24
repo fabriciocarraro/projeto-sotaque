@@ -46,7 +46,7 @@ async function invalidarCacheEstatisticas(request: Request): Promise<void> {
   }
 }
 
-export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUntil }) => {
   const ct = request.headers.get("content-type") || "";
   if (!ct.includes("multipart/form-data")) {
     return respostaJson({ error: "Envie como multipart/form-data." }, 415);
@@ -147,13 +147,6 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   const audioUrl = `${origin}/api/audio-privado/${audioToken}`;
   const callbackUrl = `${origin}/api/deepgram-callback/${callbackToken}`;
 
-  const deepgramRequestId = await enviarParaDeepgram(
-    audioUrl,
-    callbackUrl,
-    env.DEEPGRAM_API_KEY,
-  );
-  const transcricaoStatus = deepgramRequestId ? "pendente" : "falhou";
-
   try {
     const stmtSubmission = env.DB.prepare(
       `INSERT INTO submissions (
@@ -162,7 +155,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
         ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
         audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes,
         transcricao, transcricao_status, deepgram_request_id, status_moderacao, criado_em
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, 'pendente', ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 'pendente', NULL, 'pendente', ?)`,
     ).bind(
       id,
       dados.pseudonimo,
@@ -184,8 +177,6 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       audio.name,
       dados.audio_duracao_segundos ?? null,
       numFalantes,
-      transcricaoStatus,
-      deepgramRequestId,
       agora,
     );
 
@@ -231,6 +222,31 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
   }
 
   await invalidarCacheEstatisticas(request);
+
+  // Dispara o Deepgram de forma assíncrona: o usuário já recebeu a confirmação,
+  // e o Worker continua rodando via waitUntil até a requisição completar.
+  waitUntil(
+    (async () => {
+      const deepgramRequestId = await enviarParaDeepgram(
+        audioUrl,
+        callbackUrl,
+        env.DEEPGRAM_API_KEY,
+      );
+      if (deepgramRequestId) {
+        await env.DB.prepare(
+          `UPDATE submissions SET deepgram_request_id = ? WHERE id = ?`,
+        )
+          .bind(deepgramRequestId, id)
+          .run();
+      } else {
+        await env.DB.prepare(
+          `UPDATE submissions SET transcricao_status = 'falhou' WHERE id = ?`,
+        )
+          .bind(id)
+          .run();
+      }
+    })(),
+  );
 
   return respostaJson({ id, termo_versao: env.TERMO_VERSAO }, 201);
 };

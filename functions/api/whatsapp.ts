@@ -51,7 +51,7 @@ function extrairMensagem(m: NonNullable<NonNullable<WaChange["value"]>["messages
   return { tipo: "outro" };
 }
 
-export const onRequestPost: PagesFunction<WebhookEnv> = async ({ request, env }) => {
+export const onRequestPost: PagesFunction<WebhookEnv> = async ({ request, env, waitUntil }) => {
   const raw = await request.text();
   const sig = request.headers.get("x-hub-signature-256");
 
@@ -79,7 +79,7 @@ export const onRequestPost: PagesFunction<WebhookEnv> = async ({ request, env })
         }
         try {
           const msg = extrairMensagem(m);
-          await processarMensagem(env, client, m.from, msg, m.id, origin);
+          await processarMensagem(env, client, m.from, msg, m.id, origin, waitUntil);
         } catch (err) {
           console.error("Erro ao processar mensagem WhatsApp:", err);
         }

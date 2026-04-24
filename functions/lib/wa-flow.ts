@@ -247,7 +247,11 @@ async function enviarConfirmacao(client: WhatsAppClient, phone: string, m: Metad
   ]);
 }
 
-async function persistirContribuicao(env: Env, sessao: Sessao, origin: string): Promise<string> {
+async function persistirContribuicao(
+  env: Env,
+  sessao: Sessao,
+  origin: string,
+): Promise<{ id: string; audioUrl: string; callbackUrl: string }> {
   const m = sessao.metadata;
   const id = crypto.randomUUID();
   const agora = new Date().toISOString();
@@ -261,13 +265,6 @@ async function persistirContribuicao(env: Env, sessao: Sessao, origin: string): 
   const audioUrl = `${origin}/api/audio-privado/${audioToken}`;
   const callbackUrl = `${origin}/api/deepgram-callback/${callbackToken}`;
 
-  const deepgramRequestId = await enviarParaDeepgram(
-    audioUrl,
-    callbackUrl,
-    env.DEEPGRAM_API_KEY,
-  );
-  const transcricaoStatus = deepgramRequestId ? "pendente" : "falhou";
-
   const stmtSubmission = env.DB.prepare(
     `INSERT INTO submissions (
       id, pseudonimo, sotaque_declarado, regiao_socializacao, estado_principal,
@@ -275,7 +272,7 @@ async function persistirContribuicao(env: Env, sessao: Sessao, origin: string): 
       ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
       audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes,
       transcricao, transcricao_status, deepgram_request_id, status_moderacao, criado_em, source
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'celular', NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, 1, NULL, ?, ?, 'pendente', ?, 'whatsapp')`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'celular', NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, 1, NULL, 'pendente', NULL, 'pendente', ?, 'whatsapp')`,
   ).bind(
     id,
     m.pseudonimo!,
@@ -292,8 +289,6 @@ async function persistirContribuicao(env: Env, sessao: Sessao, origin: string): 
     sessao.audio_mimetype!,
     sessao.audio_nome_original!,
     sessao.audio_duracao_segundos,
-    transcricaoStatus,
-    deepgramRequestId,
     agora,
   );
 
@@ -306,7 +301,25 @@ async function persistirContribuicao(env: Env, sessao: Sessao, origin: string): 
   ).bind(id, m.email!, env.TERMO_VERSAO, `whatsapp:${sessao.phone}`, "whatsapp-bot", agora);
 
   await env.DB.batch([stmtSubmission, stmtConsent]);
-  return id;
+  return { id, audioUrl, callbackUrl };
+}
+
+export async function dispararDeepgram(
+  env: Env,
+  id: string,
+  audioUrl: string,
+  callbackUrl: string,
+): Promise<void> {
+  const requestId = await enviarParaDeepgram(audioUrl, callbackUrl, env.DEEPGRAM_API_KEY);
+  if (requestId) {
+    await env.DB.prepare(`UPDATE submissions SET deepgram_request_id = ? WHERE id = ?`)
+      .bind(requestId, id)
+      .run();
+  } else {
+    await env.DB.prepare(`UPDATE submissions SET transcricao_status = 'falhou' WHERE id = ?`)
+      .bind(id)
+      .run();
+  }
 }
 
 function regiaoDoEstado(uf: string): string {
@@ -328,6 +341,7 @@ export async function processarMensagem(
   msg: MensagemEntrada,
   waMessageId: string | null,
   origin: string,
+  waitUntil: (promise: Promise<unknown>) => void,
 ): Promise<void> {
   let sessao = (await carregarSessao(env.DB, phone)) ?? {
     phone,
@@ -480,9 +494,10 @@ export async function processarMensagem(
     }
     case "aguardando_confirmacao": {
       if (msg.tipo === "button" && msg.id === "confirmar") {
-        const id = await persistirContribuicao(env, sessao, origin);
+        const { id, audioUrl, callbackUrl } = await persistirContribuicao(env, sessao, origin);
         await client.sendText(phone, COPY.sucesso(id));
         await env.DB.prepare("DELETE FROM whatsapp_sessions WHERE phone = ?").bind(phone).run();
+        waitUntil(dispararDeepgram(env, id, audioUrl, callbackUrl));
         return;
       }
       if (msg.tipo === "button" && msg.id === "refazer") {
