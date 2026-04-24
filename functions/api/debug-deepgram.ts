@@ -1,3 +1,4 @@
+import { transcreverAudio } from "../lib/asr";
 import { gerarTokenAudio, gerarTokenCallback } from "../lib/tokens";
 
 interface Env {
@@ -5,6 +6,64 @@ interface Env {
   AUDIO_BUCKET: R2Bucket;
   DEEPGRAM_API_KEY: string;
   APP_SECRET: string;
+  OPENAI_API_KEY: string;
+  GEMINI_API_KEY?: string;
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+  let bin = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return btoa(bin);
+}
+
+async function transcreverComGemini(
+  buffer: ArrayBuffer,
+  mimeType: string,
+  apiKey: string,
+): Promise<{ ok: boolean; texto?: string; erro?: string; body?: string }> {
+  if (!apiKey) return { ok: false, erro: "GEMINI_API_KEY não configurada" };
+  if (buffer.byteLength > 20 * 1024 * 1024) {
+    return { ok: false, erro: "áudio acima de 20 MB (Gemini inline não aceita)" };
+  }
+  const base64 = bytesToBase64(new Uint8Array(buffer));
+  const body = {
+    contents: [
+      {
+        parts: [
+          {
+            text:
+              "Transcreva integralmente e apenas este áudio em português brasileiro. " +
+              "Preserve marcadores de oralidade e contrações coloquiais. " +
+              "Não traduza, não resuma, não inclua comentários. " +
+              "Responda APENAS com a transcrição pura, sem prefixos ou explicações.",
+          },
+          { inline_data: { mime_type: mimeType, data: base64 } },
+        ],
+      },
+    ],
+  };
+  try {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      },
+    );
+    const txt = await r.text();
+    if (!r.ok) return { ok: false, erro: `Gemini ${r.status}`, body: txt.slice(0, 500) };
+    const data = JSON.parse(txt) as {
+      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+    };
+    const texto = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    return texto ? { ok: true, texto } : { ok: false, erro: "resposta vazia", body: txt.slice(0, 500) };
+  } catch (err) {
+    return { ok: false, erro: err instanceof Error ? err.message : String(err) };
+  }
 }
 
 function json(body: unknown, status = 200): Response {
@@ -17,16 +76,49 @@ function json(body: unknown, status = 200): Response {
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const url = new URL(request.url);
 
-  // Modo "retry": ?retry=<submission_id> dispara Deepgram para uma contribuição existente
+  // Modo "retry": ?retry=<submission_id>&provider=<deepgram|openai|gemini>
   const retrySid = url.searchParams.get("retry");
+  const provider = (url.searchParams.get("provider") ?? "deepgram").toLowerCase();
   if (retrySid) {
     const row = await env.DB.prepare(
-      "SELECT audio_key, transcricao_status FROM submissions WHERE id = ?",
+      "SELECT audio_key, audio_mimetype, transcricao_status FROM submissions WHERE id = ?",
     )
       .bind(retrySid)
-      .first<{ audio_key: string | null; transcricao_status: string | null }>();
+      .first<{ audio_key: string | null; audio_mimetype: string | null; transcricao_status: string | null }>();
     if (!row) return json({ erro: "submission não encontrada", sid: retrySid }, 404);
     if (!row.audio_key) return json({ erro: "submission sem audio_key" }, 400);
+
+    // Providers síncronos (OpenAI, Gemini): baixa do R2 e testa sem sobrescrever D1
+    if (provider === "openai" || provider === "gemini") {
+      const obj = await env.AUDIO_BUCKET.get(row.audio_key);
+      if (!obj) return json({ erro: "áudio não achado no R2" }, 404);
+      const buffer = await obj.arrayBuffer();
+      const mimetype = row.audio_mimetype ?? obj.httpMetadata?.contentType ?? "audio/webm";
+
+      if (provider === "openai") {
+        if (buffer.byteLength > 25 * 1024 * 1024) {
+          return json({ erro: "OpenAI aceita até 25 MB", tamanho: buffer.byteLength }, 400);
+        }
+        const texto = await transcreverAudio(buffer, mimetype, env.OPENAI_API_KEY, {
+          model: "gpt-4o-transcribe",
+        });
+        return json({
+          sid: retrySid,
+          provider: "openai:gpt-4o-transcribe",
+          ok: Boolean(texto),
+          transcricao: texto,
+          aviso: "esta resposta NÃO atualiza o D1 (apenas comparação)",
+        });
+      }
+
+      const result = await transcreverComGemini(buffer, mimetype, env.GEMINI_API_KEY ?? "");
+      return json({
+        sid: retrySid,
+        provider: "gemini:2.5-flash",
+        ...result,
+        aviso: "esta resposta NÃO atualiza o D1 (apenas comparação)",
+      });
+    }
 
     const origin = new URL(request.url).origin;
     const audioToken = await gerarTokenAudio(
