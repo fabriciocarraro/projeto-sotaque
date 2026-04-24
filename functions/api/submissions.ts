@@ -5,8 +5,8 @@ import {
   MIMETYPES_PERMITIDOS,
 } from "../../src/lib/opcoes";
 import { sha256 } from "../lib/hash";
-import { enviarParaDeepgram } from "../lib/asr-deepgram";
-import { gerarTokenAudio, gerarTokenCallback } from "../lib/tokens";
+import { enviarParaElevenLabs } from "../lib/asr-elevenlabs";
+import { gerarTokenAudio } from "../lib/tokens";
 import { verificarTurnstile } from "../lib/turnstile";
 
 interface Env {
@@ -14,7 +14,7 @@ interface Env {
   AUDIO_BUCKET: R2Bucket;
   TURNSTILE_SECRET_KEY: string;
   TERMO_VERSAO: string;
-  DEEPGRAM_API_KEY: string;
+  ELEVENLABS_API_KEY: string;
   APP_SECRET: string;
 }
 
@@ -143,9 +143,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUnti
     Date.now() + 24 * 60 * 60 * 1000,
     env.APP_SECRET,
   );
-  const callbackToken = await gerarTokenCallback(id, env.APP_SECRET);
   const audioUrl = `${origin}/api/audio-privado/${audioToken}`;
-  const callbackUrl = `${origin}/api/deepgram-callback/${callbackToken}`;
 
   try {
     const stmtSubmission = env.DB.prepare(
@@ -154,8 +152,8 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUnti
         cidade_microrregiao, faixa_etaria, genero, escolaridade, tipo_dispositivo, tipo_microfone,
         ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
         audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes,
-        transcricao, transcricao_status, deepgram_request_id, status_moderacao, criado_em
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 'pendente', NULL, 'pendente', ?)`,
+        transcricao, transcricao_status, deepgram_request_id, transcricao_provider, status_moderacao, criado_em
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 'pendente', NULL, 'elevenlabs', 'pendente', ?)`,
     ).bind(
       id,
       dados.pseudonimo,
@@ -223,20 +221,16 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUnti
 
   await invalidarCacheEstatisticas(request);
 
-  // Dispara o Deepgram de forma assíncrona: o usuário já recebeu a confirmação,
+  // Dispara o ElevenLabs Scribe de forma assíncrona: o usuário já recebeu a confirmação,
   // e o Worker continua rodando via waitUntil até a requisição completar.
   waitUntil(
     (async () => {
-      const deepgramRequestId = await enviarParaDeepgram(
-        audioUrl,
-        callbackUrl,
-        env.DEEPGRAM_API_KEY,
-      );
-      if (deepgramRequestId) {
+      const requestId = await enviarParaElevenLabs(audioUrl, env.ELEVENLABS_API_KEY);
+      if (requestId) {
         await env.DB.prepare(
           `UPDATE submissions SET deepgram_request_id = ? WHERE id = ?`,
         )
-          .bind(deepgramRequestId, id)
+          .bind(requestId, id)
           .run();
       } else {
         await env.DB.prepare(

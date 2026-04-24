@@ -1,7 +1,7 @@
 import { ESCOLARIDADES, FAIXAS_ETARIAS, GENEROS, SOTAQUES, valoresDe } from "../../src/lib/opcoes";
 import { transcreverAudio } from "./asr";
-import { enviarParaDeepgram } from "./asr-deepgram";
-import { gerarTokenAudio, gerarTokenCallback } from "./tokens";
+import { enviarParaElevenLabs } from "./asr-elevenlabs";
+import { gerarTokenAudio } from "./tokens";
 import { sha256 } from "./hash";
 import {
   COPY,
@@ -75,7 +75,7 @@ export type Env = {
   WHATSAPP_PHONE_NUMBER_ID: string;
   OPENAI_API_KEY: string;
   ANTHROPIC_API_KEY: string;
-  DEEPGRAM_API_KEY: string;
+  ELEVENLABS_API_KEY: string;
   APP_SECRET: string;
 };
 
@@ -251,7 +251,7 @@ async function persistirContribuicao(
   env: Env,
   sessao: Sessao,
   origin: string,
-): Promise<{ id: string; audioUrl: string; callbackUrl: string }> {
+): Promise<{ id: string; audioUrl: string }> {
   const m = sessao.metadata;
   const id = crypto.randomUUID();
   const agora = new Date().toISOString();
@@ -261,9 +261,7 @@ async function persistirContribuicao(
     Date.now() + 24 * 60 * 60 * 1000,
     env.APP_SECRET,
   );
-  const callbackToken = await gerarTokenCallback(id, env.APP_SECRET);
   const audioUrl = `${origin}/api/audio-privado/${audioToken}`;
-  const callbackUrl = `${origin}/api/deepgram-callback/${callbackToken}`;
 
   const stmtSubmission = env.DB.prepare(
     `INSERT INTO submissions (
@@ -271,8 +269,8 @@ async function persistirContribuicao(
       cidade_microrregiao, faixa_etaria, genero, escolaridade, tipo_dispositivo, tipo_microfone,
       ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
       audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes,
-      transcricao, transcricao_status, deepgram_request_id, status_moderacao, criado_em, source
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'celular', NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, 1, NULL, 'pendente', NULL, 'pendente', ?, 'whatsapp')`,
+      transcricao, transcricao_status, deepgram_request_id, transcricao_provider, status_moderacao, criado_em, source
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'celular', NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, 1, NULL, 'pendente', NULL, 'elevenlabs', 'pendente', ?, 'whatsapp')`,
   ).bind(
     id,
     m.pseudonimo!,
@@ -301,16 +299,15 @@ async function persistirContribuicao(
   ).bind(id, m.email!, env.TERMO_VERSAO, `whatsapp:${sessao.phone}`, "whatsapp-bot", agora);
 
   await env.DB.batch([stmtSubmission, stmtConsent]);
-  return { id, audioUrl, callbackUrl };
+  return { id, audioUrl };
 }
 
-export async function dispararDeepgram(
+export async function dispararTranscricao(
   env: Env,
   id: string,
   audioUrl: string,
-  callbackUrl: string,
 ): Promise<void> {
-  const requestId = await enviarParaDeepgram(audioUrl, callbackUrl, env.DEEPGRAM_API_KEY);
+  const requestId = await enviarParaElevenLabs(audioUrl, env.ELEVENLABS_API_KEY);
   if (requestId) {
     await env.DB.prepare(`UPDATE submissions SET deepgram_request_id = ? WHERE id = ?`)
       .bind(requestId, id)
@@ -494,10 +491,10 @@ export async function processarMensagem(
     }
     case "aguardando_confirmacao": {
       if (msg.tipo === "button" && msg.id === "confirmar") {
-        const { id, audioUrl, callbackUrl } = await persistirContribuicao(env, sessao, origin);
+        const { id, audioUrl } = await persistirContribuicao(env, sessao, origin);
         await client.sendText(phone, COPY.sucesso(id));
         await env.DB.prepare("DELETE FROM whatsapp_sessions WHERE phone = ?").bind(phone).run();
-        waitUntil(dispararDeepgram(env, id, audioUrl, callbackUrl));
+        waitUntil(dispararTranscricao(env, id, audioUrl));
         return;
       }
       if (msg.tipo === "button" && msg.id === "refazer") {
