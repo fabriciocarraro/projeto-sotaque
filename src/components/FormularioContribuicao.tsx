@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, type FormEvent } from "react";
+import { useEffect, useMemo, useState, useRef, type FormEvent } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   AMBIENTES,
@@ -147,6 +147,15 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
 
   const [consent, setConsent] = useState<Consent>(ESTADO_CONSENT_INICIAL);
   const [turnstileToken, setTurnstileToken] = useState<string>("");
+
+  const [plataforma, setPlataforma] = useState<"android" | "ios" | null>(null);
+
+  useEffect(() => {
+    const ua = navigator.userAgent || "";
+    if (/android/i.test(ua)) setPlataforma("android");
+    else if (/iPhone|iPad|iPod/i.test(ua) || (/Mac/i.test(ua) && "ontouchend" in document))
+      setPlataforma("ios");
+  }, []);
 
   const [enviando, setEnviando] = useState(false);
   const [erros, setErros] = useState<Record<string, string>>({});
@@ -673,6 +682,28 @@ export default function FormularioContribuicao({ turnstileSiteKey }: Props) {
             {EXTENSOES_PERMITIDAS.join(", ")}.
           </p>
         </div>
+
+        {plataforma && (
+          <div className="rounded-lg border border-amarelo-300/60 bg-amarelo-50/70 p-4 text-sm text-verde-900">
+            <p className="flex items-center gap-2 font-medium">
+              <span aria-hidden>💡</span>
+              Quer enviar um áudio do seu WhatsApp?
+            </p>
+            {plataforma === "android" ? (
+              <p className="mt-1.5 text-verde-800">
+                No botão abaixo, toque em <strong>Escolher arquivo</strong> e navegue até{" "}
+                <span className="font-mono text-xs">WhatsApp → Media → WhatsApp Voice Notes</span>.
+              </p>
+            ) : (
+              <p className="mt-1.5 text-verde-800">
+                No iPhone, os áudios do WhatsApp não aparecem direto aqui. Primeiro abra o áudio no{" "}
+                WhatsApp → toque em <strong>Encaminhar</strong> → <strong>Salvar em Arquivos</strong>.
+                Depois volte aqui e selecione pelo botão abaixo.
+              </p>
+            )}
+          </div>
+        )}
+
         <label
           htmlFor="audio"
           className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-stone-300 bg-amarelo-50/50 p-6 text-center transition hover:border-verde-600 hover:bg-verde-50"
