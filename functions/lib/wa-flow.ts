@@ -74,7 +74,6 @@ export type Env = {
   WHATSAPP_ACCESS_TOKEN: string;
   WHATSAPP_PHONE_NUMBER_ID: string;
   OPENAI_API_KEY: string;
-  ANTHROPIC_API_KEY: string;
   ELEVENLABS_API_KEY: string;
   APP_SECRET: string;
 };
@@ -269,7 +268,7 @@ async function persistirContribuicao(
       cidade_microrregiao, faixa_etaria, genero, escolaridade, tipo_dispositivo, tipo_microfone,
       ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
       audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes,
-      transcricao, transcricao_status, deepgram_request_id, transcricao_provider, status_moderacao, criado_em, source
+      transcricao, transcricao_status, asr_request_id, transcricao_provider, status_moderacao, criado_em, source
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'celular', NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, 1, NULL, 'pendente', NULL, 'elevenlabs', 'pendente', ?, 'whatsapp')`,
   ).bind(
     id,
@@ -309,7 +308,7 @@ export async function dispararTranscricao(
 ): Promise<void> {
   const requestId = await enviarParaElevenLabs(audioUrl, env.ELEVENLABS_API_KEY);
   if (requestId) {
-    await env.DB.prepare(`UPDATE submissions SET deepgram_request_id = ? WHERE id = ?`)
+    await env.DB.prepare(`UPDATE submissions SET asr_request_id = ? WHERE id = ?`)
       .bind(requestId, id)
       .run();
   } else {
@@ -453,7 +452,7 @@ export async function processarMensagem(
     }
     case "coletando_estado": {
       if (!textoResp) return void (await client.sendText(phone, COPY.fallbackNaoEntendi));
-      const uf = await extrairEstado(textoResp, env.ANTHROPIC_API_KEY);
+      const uf = await extrairEstado(textoResp, env.OPENAI_API_KEY);
       if (!uf) return void (await client.sendText(phone, COPY.estadoInvalido));
       sessao.metadata.estado = uf;
       sessao.state = "coletando_cidade";

@@ -152,7 +152,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUnti
         cidade_microrregiao, faixa_etaria, genero, escolaridade, tipo_dispositivo, tipo_microfone,
         ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
         audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes,
-        transcricao, transcricao_status, deepgram_request_id, transcricao_provider, status_moderacao, criado_em
+        transcricao, transcricao_status, asr_request_id, transcricao_provider, status_moderacao, criado_em
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 'pendente', NULL, 'elevenlabs', 'pendente', ?)`,
     ).bind(
       id,
@@ -228,7 +228,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env, waitUnti
       const requestId = await enviarParaElevenLabs(audioUrl, env.ELEVENLABS_API_KEY);
       if (requestId) {
         await env.DB.prepare(
-          `UPDATE submissions SET deepgram_request_id = ? WHERE id = ?`,
+          `UPDATE submissions SET asr_request_id = ? WHERE id = ?`,
         )
           .bind(requestId, id)
           .run();

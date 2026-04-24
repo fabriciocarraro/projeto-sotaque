@@ -45,7 +45,7 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     const { meta } = await env.DB.prepare(
       `UPDATE submissions
        SET transcricao = ?, transcricao_status = ?
-       WHERE deepgram_request_id = ?`,
+       WHERE asr_request_id = ?`,
     )
       .bind(text, status, requestId)
       .run();

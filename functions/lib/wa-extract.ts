@@ -5,7 +5,8 @@ export { transcreverAudio };
 
 type ExtracaoEstado = { uf: string | null };
 
-export async function extrairEstado(texto: string, anthropicKey: string): Promise<string | null> {
+export async function extrairEstado(texto: string, openaiKey: string): Promise<string | null> {
+  if (!openaiKey) return null;
   const lista = ESTADOS.map((e) => `${e.valor}=${e.rotulo}`).join(", ");
   const prompt =
     `Extraia a sigla do estado brasileiro (UF) a partir do texto.\n\n` +
@@ -14,23 +15,26 @@ export async function extrairEstado(texto: string, anthropicKey: string): Promis
     `Responda APENAS com JSON no formato {"uf": "XX"} onde XX é a sigla de 2 letras, ` +
     `ou {"uf": null} se não for possível identificar um único estado.`;
 
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+  const resp = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      "x-api-key": anthropicKey,
-      "anthropic-version": "2023-06-01",
+      Authorization: `Bearer ${openaiKey}`,
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      model: "claude-haiku-4-5-20251001",
+      model: "gpt-4o-mini",
       max_tokens: 50,
+      temperature: 0,
+      response_format: { type: "json_object" },
       messages: [{ role: "user", content: prompt }],
     }),
   });
   if (!resp.ok) return null;
 
-  const data = (await resp.json()) as { content?: Array<{ text?: string }> };
-  const raw = data.content?.[0]?.text ?? "";
+  const data = (await resp.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  const raw = data.choices?.[0]?.message?.content ?? "";
   const match = raw.match(/\{[^}]+\}/);
   if (!match) return null;
   try {
