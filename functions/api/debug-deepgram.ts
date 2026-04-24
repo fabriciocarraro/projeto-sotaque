@@ -8,6 +8,7 @@ interface Env {
   APP_SECRET: string;
   OPENAI_API_KEY: string;
   GEMINI_API_KEY?: string;
+  ELEVENLABS_API_KEY?: string;
 }
 
 function bytesToBase64(bytes: Uint8Array): string {
@@ -17,6 +18,37 @@ function bytesToBase64(bytes: Uint8Array): string {
     bin += String.fromCharCode(...bytes.subarray(i, i + chunk));
   }
   return btoa(bin);
+}
+
+async function transcreverComElevenLabs(
+  buffer: ArrayBuffer,
+  mimeType: string,
+  apiKey: string,
+  model: string,
+): Promise<{ ok: boolean; texto?: string; erro?: string; body?: string }> {
+  if (!apiKey) return { ok: false, erro: "ELEVENLABS_API_KEY não configurada" };
+
+  const form = new FormData();
+  form.append("file", new Blob([buffer], { type: mimeType }), "audio.webm");
+  form.append("model_id", model);
+  form.append("language_code", "por");
+
+  try {
+    const r = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
+      method: "POST",
+      headers: { "xi-api-key": apiKey },
+      body: form,
+    });
+    const txt = await r.text();
+    if (!r.ok) return { ok: false, erro: `ElevenLabs ${r.status}`, body: txt.slice(0, 500) };
+    const data = JSON.parse(txt) as { text?: string };
+    const texto = data.text?.trim();
+    return texto
+      ? { ok: true, texto }
+      : { ok: false, erro: "resposta vazia", body: txt.slice(0, 500) };
+  } catch (err) {
+    return { ok: false, erro: err instanceof Error ? err.message : String(err) };
+  }
 }
 
 async function transcreverComGemini(
@@ -89,8 +121,8 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     if (!row) return json({ erro: "submission não encontrada", sid: retrySid }, 404);
     if (!row.audio_key) return json({ erro: "submission sem audio_key" }, 400);
 
-    // Providers síncronos (OpenAI, Gemini): baixa do R2 e testa sem sobrescrever D1
-    if (provider === "openai" || provider === "gemini") {
+    // Providers síncronos (OpenAI, Gemini, ElevenLabs): baixa do R2 e testa sem sobrescrever D1
+    if (provider === "openai" || provider === "gemini" || provider === "elevenlabs") {
       const obj = await env.AUDIO_BUCKET.get(row.audio_key);
       if (!obj) return json({ erro: "áudio não achado no R2" }, 404);
       const buffer = await obj.arrayBuffer();
@@ -112,16 +144,33 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
         });
       }
 
-      const geminiModel = url.searchParams.get("model") ?? "gemini-2.5-flash";
-      const result = await transcreverComGemini(
+      if (provider === "gemini") {
+        const geminiModel = url.searchParams.get("model") ?? "gemini-2.5-flash";
+        const result = await transcreverComGemini(
+          buffer,
+          mimetype,
+          env.GEMINI_API_KEY ?? "",
+          geminiModel,
+        );
+        return json({
+          sid: retrySid,
+          provider: `gemini:${geminiModel}`,
+          ...result,
+          aviso: "esta resposta NÃO atualiza o D1 (apenas comparação)",
+        });
+      }
+
+      // elevenlabs
+      const elevenModel = url.searchParams.get("model") ?? "scribe_v1";
+      const result = await transcreverComElevenLabs(
         buffer,
         mimetype,
-        env.GEMINI_API_KEY ?? "",
-        geminiModel,
+        env.ELEVENLABS_API_KEY ?? "",
+        elevenModel,
       );
       return json({
         sid: retrySid,
-        provider: `gemini:${geminiModel}`,
+        provider: `elevenlabs:${elevenModel}`,
         ...result,
         aviso: "esta resposta NÃO atualiza o D1 (apenas comparação)",
       });
