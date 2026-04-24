@@ -137,20 +137,15 @@ export default function Contador() {
             <div className="h-full w-px bg-verde-600/70" />
           </div>
         </div>
-        <div className="relative mt-1 h-8 text-[10px] tabular-nums text-verde-800/70">
-          <span className="absolute left-0 top-0 text-left text-verde-800/60">
-            {pctTexto} concluído
+        <div className="mt-1.5 flex items-center justify-between text-[10px] tabular-nums text-verde-800/70">
+          <span>
+            <strong className="font-semibold text-verde-800">1.000h</strong>
+            <span className="text-verde-800/60"> · meta inicial</span>
           </span>
-          <span
-            className="absolute top-0 -translate-x-1/2 whitespace-nowrap text-center"
-            style={{ left: `${META_INICIAL_PCT}%` }}
-          >
-            <span className="block font-semibold text-verde-800">1.000h</span>
-            <span className="block text-verde-800/60">meta inicial</span>
-          </span>
-          <span className="absolute right-0 top-0 whitespace-nowrap text-right">
-            <span className="block font-semibold text-verde-800">10.000h</span>
-            <span className="block text-verde-800/60">meta final</span>
+          <span className="text-verde-800/60">{pctTexto} concluído</span>
+          <span>
+            <strong className="font-semibold text-verde-800">10.000h</strong>
+            <span className="text-verde-800/60"> · meta final</span>
           </span>
         </div>
       </div>
