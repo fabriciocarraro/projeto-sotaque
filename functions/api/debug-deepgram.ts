@@ -138,12 +138,14 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
     const callbackUrl = `${origin}/api/deepgram-callback/${callbackToken}`;
 
     const deepgramModel = url.searchParams.get("model") ?? "nova-3";
+    const dryrun = url.searchParams.get("dryrun") === "1";
+
     const params = new URLSearchParams({
       model: deepgramModel,
       language: "pt-BR",
       punctuate: "true",
-      callback: callbackUrl,
     });
+    if (!dryrun) params.set("callback", callbackUrl);
 
     const r = await fetch(`https://api.deepgram.com/v1/listen?${params.toString()}`, {
       method: "POST",
@@ -154,6 +156,29 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
       body: JSON.stringify({ url: audioUrl }),
     });
     const txt = await r.text();
+
+    if (dryrun) {
+      let transcricao: string | null = null;
+      try {
+        const data = JSON.parse(txt) as {
+          results?: { channels?: Array<{ alternatives?: Array<{ transcript?: string }> }> };
+        };
+        transcricao =
+          data.results?.channels?.[0]?.alternatives?.[0]?.transcript?.trim() ?? null;
+      } catch {
+        // ignore
+      }
+      return json({
+        sid: retrySid,
+        provider: `deepgram:${deepgramModel}`,
+        ok: r.ok,
+        status: r.status,
+        transcricao,
+        body_amostra: transcricao ? undefined : txt.slice(0, 500),
+        aviso: "dry-run: esta resposta NÃO atualiza o D1",
+      });
+    }
+
     let requestId: string | null = null;
     try {
       requestId = (JSON.parse(txt) as { request_id?: string }).request_id ?? null;
