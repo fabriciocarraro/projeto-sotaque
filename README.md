@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/og-image-2.png" alt="Projeto SOTAQUE — Dataset aberto de vozes brasileiras" width="800" />
+</p>
+
 # Projeto SOTAQUE
 
 > Dataset aberto de vozes em português brasileiro, com diversidade de sotaques regionais.
