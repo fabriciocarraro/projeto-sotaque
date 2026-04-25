@@ -55,8 +55,3 @@ O Projeto é mantido por **Fabrício Carraro**, autor do best-seller [Inteligên
 
 Contato para privacidade, exercício de direitos ou parcerias: **[contato@fabriciocarraro.com.br](mailto:contato@fabriciocarraro.com.br)**
 
-## Tecnologia
-
-Site estático em [Astro](https://astro.build/) + ilhas React, hospedado em [Cloudflare Pages](https://pages.cloudflare.com/). Backend serverless via Pages Functions, com [D1](https://developers.cloudflare.com/d1/) (SQLite) para metadados e [R2](https://developers.cloudflare.com/r2/) para áudios. Transcrição assíncrona via webhook do [ElevenLabs Scribe v2](https://elevenlabs.io/speech-to-text). Anti-spam via [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/).
-
-O código deste site é aberto. Contribuições via Pull Request são bem-vindas — abra uma issue antes pra discutir mudanças significativas.
