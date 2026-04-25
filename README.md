@@ -1,158 +1,58 @@
 # Projeto SOTAQUE
 
-**Speech-Oriented Training Audio for Quality Understanding and Expression.**
+> Dataset aberto de vozes em português brasileiro, com diversidade de sotaques regionais.
 
-Dataset aberto de vozes em português brasileiro, com foco em sotaques regionais, para uso em pesquisa e treinamento de tecnologias de fala (TTS, ASR, benchmarks). Contribuição voluntária, por crowdsourcing.
+🌐 **[sotaque.ia.br](https://sotaque.ia.br)**
 
-- Site: https://sotaque.ia.br
-- Licença do dataset: CDLA-Permissive-2.0
-- Controlador: Fabrício Carraro (pessoa natural)
-- Contato para privacidade / revogação: contato@fabriciocarraro.com.br
+---
 
-## Stack
+## O que é
 
-- **Astro** (site estático + ilhas React) + **Tailwind** + **TypeScript**.
-- **Cloudflare Pages** (frontend) + **Pages Functions** (backend no mesmo projeto).
-- **D1** (SQLite) para metadados e registros de consentimento.
-- **R2** para os arquivos de áudio.
-- **Turnstile** para anti-spam.
+Hoje, quando você ouve uma IA falar em português, ela quase sempre soa igual: neutra, sem cor regional. E quando alguém com sotaque caipira, baiano ou nortista tenta usar uma assistente de voz, costuma ser mal compreendido. Os dois problemas têm a mesma raiz: **faltam vozes brasileiras diversas nos dados que treinam essas tecnologias**.
 
-## Estrutura
+A maioria dos modelos de fala em português hoje foi treinada com vozes em inglês ou em português europeu. O pouco que existe em PT-BR concentra-se em sotaques urbanos do sudeste, especialmente paulistano e carioca. O SOTAQUE existe para corrigir esse desequilíbrio, com uma base aberta, diversa e documentada que qualquer pessoa pode usar para treinar e avaliar tecnologias de fala como sintetizadores de voz, audiobooks, assistentes e transcrições automáticas.
 
-```
-src/
-├── pages/
-│   ├── index.astro         # home
-│   ├── sobre.astro
-│   ├── termo.astro         # termo v1 renderizado do markdown
-│   ├── contribuir.astro    # formulário
-│   ├── revogacao.astro
-│   └── sucesso.astro
-├── components/
-│   ├── FormularioContribuicao.tsx
-│   ├── FormularioRevogacao.tsx
-│   ├── MapaDialetos.astro
-│   └── Card.astro
-├── content/
-│   └── termo/v1.md         # termo versionado
-├── layouts/Base.astro
-└── lib/
-    ├── opcoes.ts           # listas fixas (sotaques, estados, faixas etárias, etc.)
-    ├── schema.ts           # Zod (compartilhado front/back)
-    └── revogacao.ts
+A coleta é **voluntária e por crowdsourcing**. Cada brasileiro maior de 18 anos pode contribuir com a própria voz pelo site, leva uns 2 minutos.
 
-functions/
-├── api/
-│   ├── submissions.ts      # POST /api/submissions
-│   └── revogacao.ts        # POST /api/revogacao
-└── lib/
-    ├── turnstile.ts
-    └── hash.ts
+## Por que open source
 
-migrations/
-└── 0001_init.sql           # schema D1
-```
+Datasets de voz em português hoje pertencem majoritariamente às big techs e ficam fechados, restringindo pesquisa e inovação no Brasil. O SOTAQUE é inspirado no [Mozilla Common Voice](https://commonvoice.mozilla.org/), o maior projeto público do gênero no mundo, e adaptado para a realidade do português brasileiro com foco explícito em **diversidade regional**.
 
-## Desenvolvimento local
+O dataset será publicado no [Hugging Face](https://huggingface.co/) sob licença **CDLA-Permissive-2.0** (uso amplo, inclusive comercial). Universidades públicas, pesquisadores independentes, startups, escolas e qualquer pessoa interessada poderão baixar, usar e redistribuir.
 
-```bash
-# 1. Instalar dependências
-npm install
+## Como participar
 
-# 2. Criar .dev.vars a partir do exemplo
-cp .dev.vars.example .dev.vars
-# Editar com suas chaves de teste do Turnstile (1x00000000000000000000AA / 1x0000000000000000000000000000000AA servem para sempre-passar)
+**Pelo site**: [sotaque.ia.br/contribuir](https://sotaque.ia.br/contribuir). Você grava direto pelo navegador (ou envia um áudio que já tinha gravado, inclusive áudio antigo do WhatsApp), conta um pouco sobre você (sotaque, região, escolaridade) e marca o consentimento. Pronto.
 
-# 3. Criar arquivo .env com a site key PÚBLICA do Turnstile
-echo "PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA" > .env
+**Pelo WhatsApp** (em breve): bot dedicado para receber áudios de forma ainda mais simples, direto pelo chat.
 
-# 4. Rodar migrações no D1 local
-npm run db:migrate:local
+## Status e metas
 
-# 5. Dev server (Astro sozinho, sem backend)
-npm run dev
+O contador no topo do [site](https://sotaque.ia.br) mostra o progresso ao vivo. As metas declaradas:
 
-# OU — dev server com Pages Functions (build + wrangler):
-npm run build
-npm run pages:dev
-```
+- 🎯 **Meta inicial: 1.000 horas** — escala suficiente para começar a treinar e avaliar modelos brasileiros.
+- 🎯 **Meta final: 10.000 horas** — escala em que o dataset passa a ser referência aberta para toda a comunidade de fala em português.
 
-As **test keys** do Turnstile sempre passam e funcionam fora de domínios de produção:
+Cada áudio recebido passa por transcrição automática (via [ElevenLabs Scribe v2](https://elevenlabs.io/speech-to-text)) e curadoria simples antes de entrar nas próximas versões publicadas do dataset.
 
-- Site key (pública): `1x00000000000000000000AA`
-- Secret key: `1x0000000000000000000000000000000AA`
+## Privacidade e LGPD
 
-## Deploy (primeira vez)
+O que **é** publicado no dataset: a gravação de áudio, a transcrição, e os metadados que você autorizar (sotaque declarado, região, faixa etária, gênero, escolaridade) — sempre associados a um pseudônimo público.
 
-### 1. Criar conta Cloudflare e logar
+O que **nunca** é publicado: e-mail, IP, user-agent, ou qualquer evidência de consentimento. Esses dados ficam em base separada, retidos apenas pelos prazos legais.
 
-```bash
-npx wrangler login
-```
+Você pode **revogar seu consentimento** a qualquer momento em [sotaque.ia.br/revogacao](https://sotaque.ia.br/revogacao). Importante: a revogação interrompe usos futuros, mas cópias já redistribuídas e modelos já treinados podem não ser totalmente removidos.
 
-### 2. Criar o bucket R2
+Detalhes completos no [Termo de Consentimento e Aviso de Privacidade](https://sotaque.ia.br/termo).
 
-```bash
-npx wrangler r2 bucket create sotaque-audios
-```
+## Quem está por trás
 
-### 3. Criar o banco D1 e rodar a migration
+O Projeto é mantido por **Fabrício Carraro**, autor do best-seller [Inteligência Artificial e ChatGPT](https://www.casadocodigo.com.br/products/livro-inteligencia-artificial-chatgpt) (Casa do Código) e criador do podcast *IA Sob Controle*, número 1 do Brasil na categoria Tecnologia no Spotify e no Apple Podcasts.
 
-```bash
-npx wrangler d1 create sotaque-db
-# Copie o "database_id" retornado e cole em wrangler.toml.
+Contato para privacidade, exercício de direitos ou parcerias: **[contato@fabriciocarraro.com.br](mailto:contato@fabriciocarraro.com.br)**
 
-npm run db:migrate:remote
-```
+## Tecnologia
 
-### 4. Criar o widget Turnstile
+Site estático em [Astro](https://astro.build/) + ilhas React, hospedado em [Cloudflare Pages](https://pages.cloudflare.com/). Backend serverless via Pages Functions, com [D1](https://developers.cloudflare.com/d1/) (SQLite) para metadados e [R2](https://developers.cloudflare.com/r2/) para áudios. Transcrição assíncrona via webhook do [ElevenLabs Scribe v2](https://elevenlabs.io/speech-to-text). Anti-spam via [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/).
 
-Em https://dash.cloudflare.com → Turnstile → **Add site**:
-
-- Domain: `sotaque.ia.br`
-- Widget mode: `Managed` (recomendado) ou `Invisible`
-- Copie a **Site Key** (pública) e a **Secret Key**.
-
-### 5. Criar o projeto no Cloudflare Pages
-
-Via Dashboard (mais simples):
-
-1. https://dash.cloudflare.com → Workers & Pages → **Create** → Pages → **Connect to Git**
-2. Selecionar o repo `projeto-sotaque`
-3. Build settings:
-   - **Framework preset:** Astro
-   - **Build command:** `npm run build`
-   - **Build output directory:** `dist`
-4. Environment variables (Production e Preview):
-   - `PUBLIC_TURNSTILE_SITE_KEY` = (site key pública)
-5. Após o primeiro deploy, em **Settings → Bindings**:
-   - **D1 database:** adicionar binding `DB` → `sotaque-db`
-   - **R2 bucket:** adicionar binding `AUDIO_BUCKET` → `sotaque-audios`
-   - **Variables → Secret:** adicionar `TURNSTILE_SECRET_KEY` = (secret key) e `TERMO_VERSAO` = `1.0`
-
-### 6. Apontar o domínio `sotaque.ia.br`
-
-1. No registrar onde você comprou o domínio, trocar os **nameservers** pelos da Cloudflare (a Cloudflare te mostra quais NS usar quando você adiciona o domínio no dashboard).
-2. Em Cloudflare Pages → **Custom domains** → adicionar `sotaque.ia.br`.
-3. O SSL é provisionado automaticamente.
-
-## Modelo de dados (D1)
-
-Duas bases logicamente separadas no mesmo banco:
-
-- **`submissions`** — metadados publicáveis (pseudônimo, sotaque, região, etc.) e referência ao áudio no R2. Esta é a tabela da qual o dataset público é derivado (após curadoria).
-- **`consent_records`** — evidências de consentimento (checkboxes, IP, user-agent, versão do termo) e e-mail. **Nunca publicada.** Mantida por legítimo interesse (Seção 4.2 do termo) pelos prazos da Seção 7.
-- **`revocation_requests`** — pedidos de revogação recebidos pelo formulário.
-
-## Segurança e conformidade
-
-- Nenhuma secret é commitada. `.dev.vars` está no `.gitignore`.
-- Hash SHA-256 do áudio é calculado no servidor e usado como guarda contra duplicatas.
-- IP e User-Agent são registrados apenas para prova de consentimento (Seção 4.2 do termo) e retidos conforme a Seção 7.
-- O termo é versionado (`src/content/termo/v1.md`). Ao alterar o termo, criar `v2.md`, atualizar a página `/termo` para carregar a nova versão e incrementar a secret `TERMO_VERSAO`.
-
-## Fase 2 (ainda não implementado)
-
-- Painel de moderação (`/admin`) autenticado.
-- Processamento automatizado de pedidos de revogação (marcar `consent_records.status_revogacao='revogado'` e remover arquivo do R2).
-- Exportação periódica do dataset curado para publicação.
+O código deste site é aberto. Contribuições via Pull Request são bem-vindas — abra uma issue antes pra discutir mudanças significativas.
