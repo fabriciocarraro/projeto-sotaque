@@ -71,6 +71,27 @@ type Props = {
   children?: React.ReactNode;
 };
 
+const BATCH_MAX = 5;
+const STORAGE_KEY = "sotaque:lastSubmission";
+
+type DadosSalvos = {
+  pseudonimo?: string;
+  email?: string;
+  sotaque?: string;
+  regiao?: string;
+  estado?: string;
+  cidade?: string;
+  faixaEtaria?: string;
+  genero?: string;
+  escolaridade?: string;
+  dispositivo?: string;
+  microfone?: string;
+  ambiente?: string;
+  numFalantes?: number;
+  sotaquesFalantes?: string[];
+  escolaridadesFalantes?: string[];
+};
+
 const ESTADO_CONSENT_INICIAL: Consent = {
   checkbox_1: false,
   checkbox_2: false,
@@ -143,8 +164,8 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
   const [sotaquesFalantes, setSotaquesFalantes] = useState<string[]>(["", "", "", ""]);
   const [escolaridadesFalantes, setEscolaridadesFalantes] = useState<string[]>(["", "", "", ""]);
 
-  const [arquivo, setArquivo] = useState<File | null>(null);
-  const [duracao, setDuracao] = useState<number | null>(null);
+  const [arquivos, setArquivos] = useState<File[]>([]);
+  const [duracoes, setDuracoes] = useState<Array<number | null>>([]);
   const [erroArquivo, setErroArquivo] = useState<string | null>(null);
   const [modoAudio, setModoAudio] = useState<"gravar" | "upload">("gravar");
 
@@ -160,9 +181,38 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
       setPlataforma("ios");
   }, []);
 
+  // Pré-preenche dados não-sensíveis a partir da última contribuição (localStorage)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw) as DadosSalvos;
+      if (d.pseudonimo) setPseudonimo(d.pseudonimo);
+      if (d.email) setEmail(d.email);
+      if (d.sotaque) setSotaque(d.sotaque);
+      if (d.regiao) setRegiao(d.regiao);
+      if (d.estado) setEstado(d.estado);
+      if (d.cidade) setCidade(d.cidade);
+      if (d.faixaEtaria) setFaixaEtaria(d.faixaEtaria);
+      if (d.genero) setGenero(d.genero);
+      if (d.escolaridade) setEscolaridade(d.escolaridade);
+      if (d.dispositivo) setDispositivo(d.dispositivo);
+      if (d.microfone) setMicrofone(d.microfone);
+      if (d.ambiente) setAmbiente(d.ambiente);
+      if (typeof d.numFalantes === "number") setNumFalantes(d.numFalantes);
+      if (Array.isArray(d.sotaquesFalantes)) setSotaquesFalantes(d.sotaquesFalantes);
+      if (Array.isArray(d.escolaridadesFalantes)) setEscolaridadesFalantes(d.escolaridadesFalantes);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const [enviando, setEnviando] = useState(false);
+  const [progressoEnvio, setProgressoEnvio] = useState<{ atual: number; total: number } | null>(null);
   const [erros, setErros] = useState<Record<string, string>>({});
   const [erroGeral, setErroGeral] = useState<string | null>(null);
+
+  const tokenResolverRef = useRef<((t: string) => void) | null>(null);
 
   const turnstileRef = useRef<TurnstileInstance | null>(null);
 
@@ -181,55 +231,94 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
       faixaEtaria &&
       genero &&
       escolaridade &&
-      arquivo !== null &&
+      arquivos.length > 0 &&
       !erroArquivo
     );
-  }, [pseudonimo, email, sotaque, regiao, estado, faixaEtaria, arquivo, erroArquivo]);
+  }, [pseudonimo, email, sotaque, regiao, estado, faixaEtaria, genero, escolaridade, arquivos, erroArquivo]);
 
   const podeEnviar =
     obrigatoriosOk && todosConsentimentos && !!turnstileToken && !enviando;
 
+  const listaCheia = arquivos.length >= BATCH_MAX;
+
+  function adicionarArquivo(file: File, duracaoConhecida: number | null = null): string | null {
+    if (arquivos.length >= BATCH_MAX) {
+      return `Limite de ${BATCH_MAX} áudios por envio.`;
+    }
+    if (file.size > AUDIO_TAMANHO_MAX) {
+      return `"${file.name}" passa de ${formatarTamanho(AUDIO_TAMANHO_MAX)}.`;
+    }
+    if (!extensaoValida(file.name)) {
+      return `Extensão não suportada em "${file.name}". Use: ${EXTENSOES_PERMITIDAS.join(", ")}.`;
+    }
+    if (
+      file.type &&
+      file.type !== "" &&
+      !MIMETYPES_PERMITIDOS.includes(file.type as (typeof MIMETYPES_PERMITIDOS)[number])
+    ) {
+      return `Tipo de arquivo não suportado em "${file.name}" (${file.type}).`;
+    }
+    setArquivos((prev) => [...prev, file]);
+    setDuracoes((prev) => [...prev, duracaoConhecida]);
+    return null;
+  }
+
+  function removerArquivo(idx: number) {
+    setArquivos((prev) => prev.filter((_, i) => i !== idx));
+    setDuracoes((prev) => prev.filter((_, i) => i !== idx));
+    setErroArquivo(null);
+  }
+
   function onArquivoGravado(file: File, duracaoGravada: number) {
     setErroArquivo(null);
-    if (file.size > AUDIO_TAMANHO_MAX) {
-      setArquivo(null);
-      setDuracao(null);
-      setErroArquivo(`Gravação maior que ${formatarTamanho(AUDIO_TAMANHO_MAX)}. Tente um trecho mais curto.`);
-      return;
-    }
-    setArquivo(file);
-    setDuracao(duracaoGravada > 0 ? duracaoGravada : null);
+    const erro = adicionarArquivo(file, duracaoGravada > 0 ? duracaoGravada : null);
+    if (erro) setErroArquivo(erro);
   }
 
   async function onArquivoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null;
+    const fs = Array.from(e.target.files ?? []);
     setErroArquivo(null);
-    setDuracao(null);
-    if (!f) {
-      setArquivo(null);
-      return;
+    if (fs.length === 0) return;
+
+    const espacoLivre = BATCH_MAX - arquivos.length;
+    const aProcessar = fs.slice(0, espacoLivre);
+    const erros: string[] = [];
+    if (fs.length > espacoLivre) {
+      erros.push(`Só dá pra adicionar mais ${espacoLivre} arquivo(s) (limite ${BATCH_MAX}).`);
     }
-    if (f.size > AUDIO_TAMANHO_MAX) {
-      setArquivo(null);
-      setErroArquivo(`Arquivo maior que ${formatarTamanho(AUDIO_TAMANHO_MAX)}. Reduza ou comprima o áudio.`);
-      return;
-    }
-    if (!extensaoValida(f.name)) {
-      setArquivo(null);
-      setErroArquivo(`Extensão não suportada. Use: ${EXTENSOES_PERMITIDAS.join(", ")}`);
-      return;
-    }
-    if (f.type && !MIMETYPES_PERMITIDOS.includes(f.type as (typeof MIMETYPES_PERMITIDOS)[number])) {
-      // alguns browsers não preenchem o mimetype — toleramos se a extensão passou
-      if (f.type !== "") {
-        setArquivo(null);
-        setErroArquivo(`Tipo de arquivo não suportado (${f.type}).`);
-        return;
+    for (const f of aProcessar) {
+      const erro = adicionarArquivo(f);
+      if (erro) {
+        erros.push(erro);
+        continue;
       }
+      // mede duração após adicionar (assíncrono mas não bloqueia)
+      medirDuracaoAudio(f).then((d) => {
+        setDuracoes((prev) => {
+          const copia = [...prev];
+          // acha o índice do arquivo recém-adicionado pela referência
+          const idx = arquivos.length + aProcessar.indexOf(f);
+          if (idx < copia.length) copia[idx] = d;
+          return copia;
+        });
+      });
     }
-    setArquivo(f);
-    const d = await medirDuracaoAudio(f);
-    setDuracao(d);
+    if (erros.length) setErroArquivo(erros.join(" "));
+    // limpa o input pra permitir reescolher
+    e.target.value = "";
+  }
+
+  async function awaitFreshTurnstileToken(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      tokenResolverRef.current = resolve;
+      turnstileRef.current?.reset();
+      setTimeout(() => {
+        if (tokenResolverRef.current === resolve) {
+          tokenResolverRef.current = null;
+          reject(new Error("Tempo esgotado aguardando verificação anti-spam"));
+        }
+      }, 20000);
+    });
   }
 
   async function onSubmit(e: FormEvent) {
@@ -237,7 +326,12 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
     setErros({});
     setErroGeral(null);
 
-    const payload = {
+    if (arquivos.length === 0) {
+      setErroArquivo("Adicione ao menos um arquivo de áudio.");
+      return;
+    }
+
+    const dadosBase = {
       pseudonimo: pseudonimo.trim(),
       email: email.trim(),
       sotaque_declarado: sotaque,
@@ -251,7 +345,6 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
       tipo_microfone: microfone || undefined,
       ambiente_gravacao: ambiente || undefined,
       autoavaliacao_qualidade: qualidade ? Number(qualidade) : undefined,
-      audio_duracao_segundos: duracao ?? undefined,
       falantes: [
         { sotaque: sotaque || undefined, escolaridade: escolaridade || undefined },
         ...sotaquesFalantes.slice(0, numFalantes - 1).map((s, i) => ({
@@ -260,55 +353,131 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
         })),
       ],
       consentimento: consent,
-      turnstileToken,
     };
 
-    const resultado = submissaoSchema.safeParse(payload);
-    if (!resultado.success) {
-      const mapa: Record<string, string> = {};
-      for (const issue of resultado.error.issues) {
-        const caminho = issue.path.join(".");
-        if (!mapa[caminho]) mapa[caminho] = issue.message;
-      }
-      setErros(mapa);
-      setErroGeral("Há campos inválidos. Revise os itens destacados.");
-      return;
-    }
-    if (!arquivo) {
-      setErroArquivo("Selecione um arquivo de áudio.");
-      return;
-    }
-
     setEnviando(true);
+    setProgressoEnvio({ atual: 0, total: arquivos.length });
+
+    const idsCriados: string[] = [];
+    const falhas: Array<{ nome: string; erro: string }> = [];
+    let tokenAtual = turnstileToken;
+
     try {
-      const fd = new FormData();
-      fd.append("audio", arquivo, arquivo.name);
-      fd.append("dados", JSON.stringify(resultado.data));
+      for (let i = 0; i < arquivos.length; i++) {
+        const arquivo = arquivos[i];
+        const duracao = duracoes[i];
 
-      const resp = await fetch("/api/submissions", {
-        method: "POST",
-        body: fd,
-      });
+        setProgressoEnvio({ atual: i + 1, total: arquivos.length });
 
-      if (!resp.ok) {
-        let msg = "Erro ao enviar. Tente novamente.";
+        const payload = {
+          ...dadosBase,
+          audio_duracao_segundos: duracao ?? undefined,
+          turnstileToken: tokenAtual,
+        };
+
+        const resultado = submissaoSchema.safeParse(payload);
+        if (!resultado.success) {
+          const mapa: Record<string, string> = {};
+          for (const issue of resultado.error.issues) {
+            const caminho = issue.path.join(".");
+            if (!mapa[caminho]) mapa[caminho] = issue.message;
+          }
+          setErros(mapa);
+          setErroGeral("Há campos inválidos. Revise os itens destacados.");
+          break;
+        }
+
         try {
-          const j = (await resp.json()) as { error?: string };
-          if (j.error) msg = j.error;
+          const fd = new FormData();
+          fd.append("audio", arquivo, arquivo.name);
+          fd.append("dados", JSON.stringify(resultado.data));
+
+          const resp = await fetch("/api/submissions", { method: "POST", body: fd });
+
+          if (!resp.ok) {
+            let msg = "Erro ao enviar.";
+            try {
+              const j = (await resp.json()) as { error?: string };
+              if (j.error) msg = j.error;
+            } catch {
+              // ignore
+            }
+            falhas.push({ nome: arquivo.name, erro: msg });
+          } else {
+            const j = (await resp.json()) as { id: string };
+            idsCriados.push(j.id);
+          }
+        } catch (err) {
+          falhas.push({
+            nome: arquivo.name,
+            erro: err instanceof Error ? err.message : "Erro desconhecido.",
+          });
+        }
+
+        // Pra próximos uploads no batch, precisa de token fresh do Turnstile
+        if (i < arquivos.length - 1) {
+          try {
+            tokenAtual = await awaitFreshTurnstileToken();
+          } catch (err) {
+            setErroGeral(
+              err instanceof Error ? err.message : "Falha ao renovar verificação anti-spam.",
+            );
+            break;
+          }
+        }
+      }
+
+      // Salva metadados pra próxima contribuição
+      if (idsCriados.length > 0) {
+        try {
+          const dadosParaSalvar: DadosSalvos = {
+            pseudonimo: pseudonimo.trim(),
+            email: email.trim(),
+            sotaque,
+            regiao,
+            estado,
+            cidade: cidade.trim() || undefined,
+            faixaEtaria,
+            genero,
+            escolaridade,
+            dispositivo,
+            microfone,
+            ambiente,
+            numFalantes,
+            sotaquesFalantes,
+            escolaridadesFalantes,
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(dadosParaSalvar));
         } catch {
           // ignore
         }
-        throw new Error(msg);
       }
 
-      const j = (await resp.json()) as { id: string };
-      window.location.href = `/sucesso?id=${encodeURIComponent(j.id)}`;
-    } catch (err) {
-      setErroGeral(err instanceof Error ? err.message : "Erro desconhecido.");
-      turnstileRef.current?.reset();
-      setTurnstileToken("");
+      if (falhas.length === 0 && idsCriados.length > 0) {
+        // todos OK
+        window.location.href = `/sucesso?id=${encodeURIComponent(idsCriados[0])}${idsCriados.length > 1 ? `&total=${idsCriados.length}` : ""}`;
+      } else if (idsCriados.length > 0) {
+        // sucesso parcial
+        const detalhes = falhas.map((f) => `• ${f.nome}: ${f.erro}`).join("\n");
+        setErroGeral(
+          `${idsCriados.length} de ${arquivos.length} áudio(s) enviados. Falhas:\n${detalhes}`,
+        );
+        // remove só os que deram certo
+        const nomesFalha = new Set(falhas.map((f) => f.nome));
+        setArquivos((prev) => prev.filter((a) => nomesFalha.has(a.name)));
+        setDuracoes((prev) =>
+          prev.filter((_, i) => arquivos[i] && nomesFalha.has(arquivos[i].name)),
+        );
+      } else {
+        // todas falharam
+        const detalhes = falhas.map((f) => `• ${f.nome}: ${f.erro}`).join("\n");
+        setErroGeral(`Nenhum áudio enviado. Detalhes:\n${detalhes}`);
+      }
     } finally {
       setEnviando(false);
+      setProgressoEnvio(null);
+      turnstileRef.current?.reset();
+      setTurnstileToken("");
     }
   }
 
@@ -704,9 +873,9 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
       {/* Seção 6 */}
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
-          <h2 className="text-lg font-semibold text-verde-900">6. Arquivo de áudio</h2>
+          <h2 className="text-lg font-semibold text-verde-900">6. Arquivo(s) de áudio</h2>
           <p className="mt-1 text-sm text-verde-800">
-            Grave direto pelo navegador ou envie um arquivo existente (até {formatarTamanho(AUDIO_TAMANHO_MAX)}).
+            Grave direto pelo navegador ou envie até {BATCH_MAX} arquivos existentes (cada um até {formatarTamanho(AUDIO_TAMANHO_MAX)}).
           </p>
         </div>
 
@@ -736,7 +905,11 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
         </div>
 
         {modoAudio === "gravar" && (
-          <GravadorAudio onGravado={onArquivoGravado} maxBytes={AUDIO_TAMANHO_MAX} />
+          <GravadorAudio
+            onGravado={onArquivoGravado}
+            maxBytes={AUDIO_TAMANHO_MAX}
+            disabled={listaCheia}
+          />
         )}
 
         {modoAudio === "upload" && (
@@ -764,41 +937,86 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
 
             <label
               htmlFor="audio"
-              className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-stone-300 bg-amarelo-50/50 p-6 text-center transition hover:border-verde-600 hover:bg-verde-50"
+              className={`flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-6 text-center transition ${
+                listaCheia
+                  ? "cursor-not-allowed border-stone-200 bg-stone-50 opacity-60"
+                  : "cursor-pointer border-stone-300 bg-amarelo-50/50 hover:border-verde-600 hover:bg-verde-50"
+              }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-8 w-8 text-verde-700">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7-7-7 7M12 2v14M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2" />
               </svg>
               <span className="text-sm font-medium text-verde-900">
-                {arquivo ? "Trocar arquivo" : "Clique para selecionar o arquivo"}
+                {listaCheia
+                  ? `Limite de ${BATCH_MAX} arquivos atingido`
+                  : arquivos.length > 0
+                    ? "Adicionar mais arquivos"
+                    : "Clique para selecionar arquivo(s)"}
               </span>
               <span className="text-xs text-verde-800/80">
-                Até {formatarTamanho(AUDIO_TAMANHO_MAX)} · {EXTENSOES_PERMITIDAS.join(", ")}
+                Até {formatarTamanho(AUDIO_TAMANHO_MAX)} cada · {EXTENSOES_PERMITIDAS.join(", ")}
               </span>
               <input
                 id="audio"
                 type="file"
+                multiple
                 accept={EXTENSOES_PERMITIDAS.join(",")}
                 onChange={onArquivoChange}
                 className="sr-only"
+                disabled={listaCheia}
               />
             </label>
           </>
         )}
 
-        {arquivo && (
-          <div className="flex items-center gap-3 rounded-md bg-verde-50 px-4 py-3 text-sm text-verde-900">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 flex-shrink-0 text-verde-700">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19a3 3 0 01-3 3h0a3 3 0 01-3-3v0a3 3 0 013-3h3zM21 16a3 3 0 01-3 3h0a3 3 0 01-3-3v0a3 3 0 013-3h3z" />
-            </svg>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-medium">{arquivo.name}</p>
-              <p className="text-xs text-verde-800">
-                {formatarTamanho(arquivo.size)}
-                {duracao !== null && <> · {formatarDuracao(duracao)}</>}
-              </p>
-            </div>
+        {arquivos.length > 1 && (
+          <div className="rounded-md border border-amarelo-300/60 bg-amarelo-50/70 p-3 text-sm text-verde-900">
+            <p className="flex items-center gap-2 font-medium">
+              <span aria-hidden>⚠️</span>
+              Atenção: dados do formulário aplicados a todos os {arquivos.length} áudios
+            </p>
+            <p className="mt-1 text-verde-800">
+              O sotaque, equipamento, ambiente, qualidade e demais campos serão registrados igual em
+              todos os áudios deste envio. <strong>Se variarem entre os áudios</strong> (ex: um foi
+              gravado no celular e outro no microfone USB), envie cada um em uma submissão separada.
+            </p>
           </div>
+        )}
+
+        {arquivos.length > 0 && (
+          <ul className="space-y-2">
+            {arquivos.map((arquivo, idx) => (
+              <li
+                key={`${arquivo.name}-${idx}`}
+                className="flex items-center gap-3 rounded-md bg-verde-50 px-4 py-3 text-sm text-verde-900"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 flex-shrink-0 text-verde-700">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19a3 3 0 01-3 3h0a3 3 0 01-3-3v0a3 3 0 013-3h3zM21 16a3 3 0 01-3 3h0a3 3 0 01-3-3v0a3 3 0 013-3h3z" />
+                </svg>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">
+                    {arquivos.length > 1 && <span className="text-verde-700">{idx + 1}. </span>}
+                    {arquivo.name}
+                  </p>
+                  <p className="text-xs text-verde-800">
+                    {formatarTamanho(arquivo.size)}
+                    {duracoes[idx] !== null && duracoes[idx] !== undefined && (
+                      <> · {formatarDuracao(duracoes[idx]!)}</>
+                    )}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removerArquivo(idx)}
+                  disabled={enviando}
+                  className="flex-shrink-0 rounded-md border border-stone-300 bg-white px-2 py-1 text-xs font-medium text-verde-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label={`Remover ${arquivo.name}`}
+                >
+                  Remover
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
         {erroArquivo && <p className="text-sm text-red-600">{erroArquivo}</p>}
       </section>
@@ -872,14 +1090,20 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
           ref={turnstileRef}
           siteKey={turnstileSiteKey}
           options={{ theme: "light", language: "pt-br" }}
-          onSuccess={(token) => setTurnstileToken(token)}
+          onSuccess={(token) => {
+            setTurnstileToken(token);
+            if (tokenResolverRef.current) {
+              tokenResolverRef.current(token);
+              tokenResolverRef.current = null;
+            }
+          }}
           onExpire={() => setTurnstileToken("")}
           onError={() => setTurnstileToken("")}
         />
       </section>
 
       {erroGeral && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">
+        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800 whitespace-pre-line" role="alert">
           {erroGeral}
         </div>
       )}
@@ -888,10 +1112,27 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
         <button
           type="submit"
           disabled={!podeEnviar}
-          className="inline-flex items-center justify-center rounded-md bg-verde-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-verde-700 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-verde-800/80"
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-verde-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-verde-700 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-verde-800/80"
         >
-          {enviando ? "Enviando…" : "Enviar contribuição"}
+          {enviando && (
+            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.25" />
+              <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+          )}
+          {enviando
+            ? progressoEnvio && progressoEnvio.total > 1
+              ? `Enviando ${progressoEnvio.atual} de ${progressoEnvio.total}…`
+              : "Enviando…"
+            : arquivos.length > 1
+              ? `Enviar ${arquivos.length} contribuições`
+              : "Enviar contribuição"}
         </button>
+        {enviando && (
+          <p className="text-xs text-verde-800/80">
+            Pode demorar até 1 minuto por arquivo grande. Não feche a página.
+          </p>
+        )}
         {!podeEnviar && !enviando && (
           <p className="text-xs text-verde-800/80">
             {!obrigatoriosOk

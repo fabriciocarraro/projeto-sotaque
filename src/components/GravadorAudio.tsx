@@ -20,6 +20,7 @@ type Estado = "idle" | "gravando" | "gravado" | "erro";
 type Props = {
   onGravado: (file: File, duracao: number) => void;
   maxBytes: number;
+  disabled?: boolean;
 };
 
 function formatar(seg: number): string {
@@ -35,7 +36,7 @@ function extensaoPara(mime: string): string {
   return "webm";
 }
 
-export default function GravadorAudio({ onGravado, maxBytes }: Props) {
+export default function GravadorAudio({ onGravado, maxBytes, disabled = false }: Props) {
   const [estado, setEstado] = useState<Estado>("idle");
   const [duracao, setDuracao] = useState(0);
   const [erro, setErro] = useState<string | null>(null);
@@ -135,6 +136,13 @@ export default function GravadorAudio({ onGravado, maxBytes }: Props) {
     const ext = extensaoPara(tipoBase);
     const file = new File([blob], `gravacao-${Date.now()}.${ext}`, { type: tipoBase });
     onGravado(file, duracao);
+    // Reset pra permitir gravar mais (caso de batch)
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    chunksRef.current = [];
+    setDuracao(0);
+    setErro(null);
+    setEstado("idle");
   }
 
   useEffect(() => {
@@ -166,10 +174,11 @@ export default function GravadorAudio({ onGravado, maxBytes }: Props) {
         <button
           type="button"
           onClick={iniciar}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-verde-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-verde-700"
+          disabled={disabled}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-verde-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-verde-700 disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-verde-800/80"
         >
           <MicIcon />
-          Começar gravação
+          {disabled ? "Limite de áudios atingido" : "Começar gravação"}
         </button>
       )}
 
@@ -201,7 +210,7 @@ export default function GravadorAudio({ onGravado, maxBytes }: Props) {
               onClick={usar}
               className="flex-1 rounded-md bg-verde-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-verde-700"
             >
-              Usar esta gravação
+              Adicionar à lista
             </button>
             <button
               type="button"
