@@ -14,6 +14,7 @@ import {
   MIMETYPES_PERMITIDOS,
   QUALIDADE,
   REGIOES,
+  REGIOES_SOTAQUE_LABEL,
   SOTAQUES,
 } from "../lib/opcoes";
 import { submissaoSchema } from "../lib/schema";
@@ -187,9 +188,10 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as DadosSalvos;
+      const sotaquesValidos = new Set<string>(SOTAQUES.map((s) => s.valor));
       if (d.pseudonimo) setPseudonimo(d.pseudonimo);
       if (d.email) setEmail(d.email);
-      if (d.sotaque) setSotaque(d.sotaque);
+      if (d.sotaque && sotaquesValidos.has(d.sotaque)) setSotaque(d.sotaque);
       if (d.regiao) setRegiao(d.regiao);
       if (d.estado) setEstado(d.estado);
       if (d.cidade) setCidade(d.cidade);
@@ -200,12 +202,25 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
       if (d.microfone) setMicrofone(d.microfone);
       if (d.ambiente) setAmbiente(d.ambiente);
       if (typeof d.numFalantes === "number") setNumFalantes(d.numFalantes);
-      if (Array.isArray(d.sotaquesFalantes)) setSotaquesFalantes(d.sotaquesFalantes);
+      if (Array.isArray(d.sotaquesFalantes)) {
+        setSotaquesFalantes(d.sotaquesFalantes.map((s) => (sotaquesValidos.has(s) ? s : "")));
+      }
       if (Array.isArray(d.escolaridadesFalantes)) setEscolaridadesFalantes(d.escolaridadesFalantes);
     } catch {
       // ignore
     }
   }, []);
+
+  // Quando a região muda, reseta o sotaque se ele não pertencer à nova região (nem aos globais)
+  useEffect(() => {
+    if (!regiao) return;
+    if (!sotaque) return;
+    const valido = SOTAQUES.some(
+      (s) => s.valor === sotaque && (s.regiao === regiao || s.regiao === "outro"),
+    );
+    if (!valido) setSotaque("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [regiao]);
 
   const [enviando, setEnviando] = useState(false);
   const [progressoEnvio, setProgressoEnvio] = useState<{ atual: number; total: number } | null>(null);
@@ -549,10 +564,7 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
       {children && (
         <section className="space-y-3 border-b border-stone-200 pb-8">
           <div>
-            <h3 className="text-sm font-semibold text-verde-900">Dialetos do português brasileiro</h3>
-            <p className="mt-1 text-xs text-verde-800">
-              Use a imagem como referência ao escolher seu sotaque na próxima seção.
-            </p>
+            <h3 className="text-sm font-semibold text-verde-900">Alguns dialetos do português brasileiro</h3>
           </div>
           {children}
         </section>
@@ -562,30 +574,8 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
           <h2 className="text-lg font-semibold text-verde-900">2. Perfil linguístico</h2>
-          <p className="mt-1 text-sm text-verde-800">Ajude a caracterizar o seu sotaque e origem.</p>
+          <p className="mt-1 text-sm text-verde-800">Ajude a caracterizar a sua origem e o seu sotaque.</p>
         </div>
-
-        <Campo
-          id="sotaque"
-          rotulo="Sotaque declarado"
-          ajuda="Como você descreveria seu próprio sotaque? Veja o mapa acima se precisar de referência."
-          obrigatorio
-          erro={erros["sotaque_declarado"]}
-        >
-          <select
-            id="sotaque"
-            value={sotaque}
-            onChange={(e) => setSotaque(e.target.value)}
-            className={inputClasse(!!erros["sotaque_declarado"])}
-          >
-            <option value="">Selecione…</option>
-            {SOTAQUES.map((s) => (
-              <option key={s.valor} value={s.valor}>
-                {"numero" in s ? `${s.numero}. ${s.rotulo}` : s.rotulo}
-              </option>
-            ))}
-          </select>
-        </Campo>
 
         <Campo
           id="regiao"
@@ -639,6 +629,45 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
             maxLength={120}
             className={inputClasse(!!erros["cidade_microrregiao"])}
           />
+        </Campo>
+
+        <Campo
+          id="sotaque"
+          rotulo="Sotaque declarado"
+          ajuda={
+            regiao
+              ? "Escolha o sotaque mais próximo. As 3 últimas opções valem para qualquer região."
+              : "Selecione a região acima para ver os sotaques disponíveis."
+          }
+          obrigatorio
+          erro={erros["sotaque_declarado"]}
+        >
+          <select
+            id="sotaque"
+            value={sotaque}
+            onChange={(e) => setSotaque(e.target.value)}
+            disabled={!regiao}
+            className={inputClasse(!!erros["sotaque_declarado"])}
+          >
+            <option value="">
+              {regiao ? "Selecione…" : "Selecione a região acima primeiro"}
+            </option>
+            {regiao &&
+              SOTAQUES.filter((s) => s.regiao === regiao).map((s) => (
+                <option key={s.valor} value={s.valor}>
+                  {s.rotulo}
+                </option>
+              ))}
+            {regiao && (
+              <optgroup label="── Casos especiais ──">
+                {SOTAQUES.filter((s) => s.regiao === "outro").map((s) => (
+                  <option key={s.valor} value={s.valor}>
+                    {s.rotulo}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+          </select>
         </Campo>
       </section>
 
@@ -839,11 +868,19 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
                     className={inputClasse(!!erros[`falantes.${i + 1}.sotaque`])}
                   >
                     <option value="">Não sei / prefiro não dizer</option>
-                    {SOTAQUES.map((s) => (
-                      <option key={s.valor} value={s.valor}>
-                        {"numero" in s ? `${s.numero}. ${s.rotulo}` : s.rotulo}
-                      </option>
-                    ))}
+                    {Object.keys(REGIOES_SOTAQUE_LABEL).map((regKey) => {
+                      const opcoes = SOTAQUES.filter((s) => s.regiao === regKey);
+                      if (opcoes.length === 0) return null;
+                      return (
+                        <optgroup key={regKey} label={REGIOES_SOTAQUE_LABEL[regKey]}>
+                          {opcoes.map((s) => (
+                            <option key={s.valor} value={s.valor}>
+                              {s.rotulo}
+                            </option>
+                          ))}
+                        </optgroup>
+                      );
+                    })}
                   </select>
                 </Campo>
                 <Campo

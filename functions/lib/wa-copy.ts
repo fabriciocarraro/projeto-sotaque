@@ -90,13 +90,13 @@ export const LISTA_ESCOLARIDADES = ESCOLARIDADES.map((e) => ({
   description: e.rotulo,
 }));
 
-// WhatsApp lista: máximo 10 rows. Dividimos sotaques em duas.
-export const SOTAQUES_LISTA_1 = SOTAQUES.slice(0, 9).map((s) => ({
+// TODO: redesenhar fluxo de sotaque do bot WhatsApp pra hierarquia em 2 níveis
+// (região primeiro, depois sotaque filtrado). A lista do WhatsApp tem máximo
+// 10 rows, e agora temos 60+ sotaques. Por enquanto, listas são placeholders
+// que mostram a 1ª opção de cada região nas duas listas pra compilar.
+const PLACEHOLDER = SOTAQUES.slice(0, 9).map((s) => ({ id: s.valor, title: s.rotulo }));
+export const SOTAQUES_LISTA_1 = PLACEHOLDER;
+export const SOTAQUES_LISTA_2 = SOTAQUES.slice(9, 18).map((s) => ({
   id: s.valor,
-  title: "numero" in s ? `${s.numero}. ${s.rotulo}` : s.rotulo,
-}));
-
-export const SOTAQUES_LISTA_2 = SOTAQUES.slice(9).map((s) => ({
-  id: s.valor,
-  title: "numero" in s ? `${s.numero}. ${s.rotulo}` : s.rotulo,
+  title: s.rotulo,
 }));

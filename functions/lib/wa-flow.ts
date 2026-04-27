@@ -1,5 +1,4 @@
 import { ESCOLARIDADES, FAIXAS_ETARIAS, GENEROS, SOTAQUES, valoresDe } from "../../src/lib/opcoes";
-import { transcreverAudio } from "./asr";
 import { enviarParaElevenLabs } from "./asr-elevenlabs";
 import { gerarTokenAudio } from "./tokens";
 import { sha256 } from "./hash";

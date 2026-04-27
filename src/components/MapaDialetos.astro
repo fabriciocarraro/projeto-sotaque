@@ -1,55 +1,11 @@
 ---
-import { SOTAQUES } from "../lib/opcoes";
-
-const numerados = SOTAQUES.filter(
-  (s): s is typeof s & { numero: number } => "numero" in s && typeof s.numero === "number",
-).sort((a, b) => a.numero - b.numero);
 ---
 
-<div class="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-center">
-  <figure class="mx-auto w-full max-w-sm">
-    <img
-      src="/dialetos.png"
-      alt="Mapa dos dialetos do português brasileiro, com regiões numeradas de 1 a 16"
-      class="block w-full"
-      loading="lazy"
-    />
-  </figure>
-
-  <div>
-    <div class="grid grid-cols-2 gap-x-4">
-      <ul class="space-y-1.5 text-sm text-verde-900">
-        {
-          numerados.slice(0, 8).map((s) => (
-            <li class="flex items-baseline gap-2">
-              <span class="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-verde-600 text-[10px] font-bold text-white">
-                {s.numero}
-              </span>
-              <span>{s.rotulo}</span>
-            </li>
-          ))
-        }
-      </ul>
-      <ul class="space-y-1.5 text-sm text-verde-900">
-        {
-          numerados.slice(8).map((s) => (
-            <li class="flex items-baseline gap-2">
-              <span class="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-verde-600 text-[10px] font-bold text-white">
-                {s.numero}
-              </span>
-              <span>{s.rotulo}</span>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-    <p class="mt-4 text-xs text-verde-800/80">
-      Fonte:
-      <a
-        href="https://pt.wikipedia.org/wiki/Portugu%C3%AAs_brasileiro#Dialetos_do_portugu%C3%AAs_brasileiro"
-        rel="noopener"
-        target="_blank"
-        class="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800">Wikipédia</a>.
-    </p>
-  </div>
-</div>
+<figure class="mx-auto w-full max-w-2xl">
+  <img
+    src="/dialetos2.png"
+    alt="Mapa de alguns dialetos do português brasileiro"
+    class="block w-full"
+    loading="lazy"
+  />
+</figure>
