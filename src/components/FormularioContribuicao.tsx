@@ -633,7 +633,7 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
 
         <Campo
           id="sotaque"
-          rotulo="Sotaque declarado"
+          rotulo="Sotaque declarado (com base na região selecionada acima)"
           ajuda={
             regiao
               ? "Escolha o sotaque mais próximo. As 3 últimas opções valem para qualquer região."
