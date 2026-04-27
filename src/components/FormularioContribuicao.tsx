@@ -618,7 +618,7 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
         <Campo
           id="cidade"
           rotulo="Cidade ou microrregião"
-          ajuda="Opcional. Pode deixar em branco se preferir."
+          ajuda="Opcional, mas ajuda muito na representação regional do dataset. Pode pular se preferir."
           erro={erros["cidade_microrregiao"]}
         >
           <input
