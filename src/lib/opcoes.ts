@@ -30,7 +30,7 @@ export const SOTAQUES = [
   { valor: "nordeste-piauiense-teresina", rotulo: "Piauiense - grande Teresina", regiao: "nordeste" },
   { valor: "nordeste-potiguar-interior", rotulo: "Potiguar - interior", regiao: "nordeste" },
   { valor: "nordeste-potiguar-natal", rotulo: "Potiguar - grande Natal", regiao: "nordeste" },
-  { valor: "nordeste-sergipano-aracaju", rotulo: "Sergipano - grande Aracajú", regiao: "nordeste" },
+  { valor: "nordeste-sergipano-aracaju", rotulo: "Sergipano - grande Aracaju", regiao: "nordeste" },
   { valor: "nordeste-sergipano-interior", rotulo: "Sergipano - interior", regiao: "nordeste" },
   { valor: "nordeste-sertanejo", rotulo: "Sertanejo - interior nordestino", regiao: "nordeste" },
   { valor: "nordeste-outro", rotulo: "Outro do Nordeste / não sei", regiao: "nordeste" },
@@ -53,7 +53,7 @@ export const SOTAQUES = [
   { valor: "sudeste-mineiro-bh", rotulo: "Mineiro - grande Belo Horizonte", regiao: "sudeste" },
   { valor: "sudeste-mineiro-centro-leste", rotulo: "Mineiro - centro-leste / Zona da Mata", regiao: "sudeste" },
   { valor: "sudeste-mineiro-norte", rotulo: "Mineiro - norte de Minas", regiao: "sudeste" },
-  { valor: "sudeste-mineiro-sul-triangulo", rotulo: "Mineiro - sul de Minas / Triângulo", regiao: "sudeste" },
+  { valor: "sudeste-mineiro-sul-triangulo", rotulo: "Mineiro - sul / Triângulo Mineiro", regiao: "sudeste" },
   { valor: "sudeste-paulista-interior", rotulo: "Paulista - interior / caipira paulista", regiao: "sudeste" },
   { valor: "sudeste-paulista-litoral", rotulo: "Paulista - litoral", regiao: "sudeste" },
   { valor: "sudeste-paulista-saopaulo", rotulo: "Paulista - grande São Paulo", regiao: "sudeste" },
@@ -65,7 +65,7 @@ export const SOTAQUES = [
   { valor: "sul-catarinense-interior", rotulo: "Catarinense - interior", regiao: "sul" },
   { valor: "sul-catarinense-itajai", rotulo: "Catarinense - Itajaí (peixeiro)", regiao: "sul" },
   { valor: "sul-gaucho-fronteira", rotulo: "Gaúcho - fronteira", regiao: "sul" },
-  { valor: "sul-gaucho-interior", rotulo: "Gaúcho - interior / Serra", regiao: "sul" },
+  { valor: "sul-gaucho-interior", rotulo: "Gaúcho - interior / Serra Gaúcha", regiao: "sul" },
   { valor: "sul-gaucho-poa", rotulo: "Gaúcho - grande Porto Alegre", regiao: "sul" },
   { valor: "sul-paranaense-curitiba", rotulo: "Paranaense - grande Curitiba", regiao: "sul" },
   { valor: "sul-paranaense-norte", rotulo: "Paranaense - norte / caipira", regiao: "sul" },
@@ -74,7 +74,7 @@ export const SOTAQUES = [
   // Outro (sempre disponível, independente da região)
   { valor: "outro-neutro", rotulo: "Brasileiro neutro / padrão de mídia", regiao: "outro" },
   { valor: "outro-misto", rotulo: "Misto / cresci em mais de uma região", regiao: "outro" },
-  { valor: "outro-imigracao", rotulo: "Comunidade de imigração / local específico", regiao: "outro" },
+  { valor: "outro-imigracao", rotulo: "Colônia de imigração (italiana, alemã, outra)", regiao: "outro" },
 ] as const;
 
 export const REGIOES_SOTAQUE_LABEL: Record<string, string> = {
