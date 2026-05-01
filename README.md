@@ -51,7 +51,7 @@ Detalhes completos no [Termo de Consentimento e Aviso de Privacidade](https://so
 
 ## Quem está por trás
 
-O Projeto é mantido por **Fabrício Carraro**, autor do best-seller [Inteligência Artificial e ChatGPT](https://www.casadocodigo.com.br/products/livro-inteligencia-artificial-chatgpt) (Casa do Código) e criador do podcast *IA Sob Controle*, número 1 do Brasil na categoria Tecnologia no Spotify e no Apple Podcasts.
+O Projeto é mantido por **Fabrício Carraro**, autor do best-seller [Inteligência Artificial e ChatGPT](https://www.casadocodigo.com.br/products/livro-inteligencia-artificial-chatgpt) (Casa do Código) e criador do podcast [*IA Sob Controle*](https://open.spotify.com/show/5xLCMHJ6eGWzdu8JaIDkuP?si=838a0ff121b24835), número 1 do Brasil na categoria Tecnologia no Spotify e no Apple Podcasts.
 
 Contato para privacidade, exercício de direitos ou parcerias: **[contato@fabriciocarraro.com.br](mailto:contato@fabriciocarraro.com.br)**
 
