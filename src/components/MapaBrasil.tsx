@@ -276,30 +276,6 @@ export default function MapaBrasil() {
         </div>
       )}
 
-      {/* Callout do destaque (sempre visível abaixo do mapa) */}
-      {destaque && (
-        <div
-          className={`mt-3 flex items-center gap-2 rounded-md border border-verde-600/40 bg-verde-50 px-3 py-2 text-xs text-verde-900 ${
-            destaque.contribuicoes === 0 ? "motion-safe:animate-pulse" : ""
-          }`}
-        >
-          <span aria-hidden>🎯</span>
-          <span>
-            {destaque.contribuicoes === 0 ? (
-              <>
-                <strong className="font-semibold">{destaque.nome}</strong> ainda não tem nenhuma
-                voz. <span className="text-verde-700">Seja o primeiro!</span>
-              </>
-            ) : (
-              <>
-                <strong className="font-semibold">{destaque.nome}</strong> está sub-representado.{" "}
-                <span className="text-verde-700">Sua voz pode mudar isso.</span>
-              </>
-            )}
-          </span>
-        </div>
-      )}
-
       {/* Legenda */}
       <div className="mt-3 space-y-1.5">
         <div className="flex flex-wrap items-center gap-2 text-[10px] text-verde-800/70">
