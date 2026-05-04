@@ -54,7 +54,7 @@ function corDoEstado(porMilhao: number, maxPorMilhao: number, contribs: number):
 export default function MapaBrasil() {
   const [stats, setStats] = useState<EstadoStat[] | null>(null);
   const [erro, setErro] = useState(false);
-  const [hover, setHover] = useState<{ uf: string; x: number; y: number } | null>(null);
+  const [selecionado, setSelecionado] = useState<string | null>(null);
   const [animado, setAnimado] = useState(false);
 
   useEffect(() => {
@@ -131,128 +131,109 @@ export default function MapaBrasil() {
     return m;
   }, [calculados]);
 
-  const stateAtual = hover ? ufLookup.get(hover.uf) ?? null : null;
+  // Estado mostrado no painel: o selecionado/hovered, ou o destaque por padrão
+  const stateAtual = (selecionado ? ufLookup.get(selecionado) : null) ?? destaque ?? null;
+  const mostrandoDestaque = stateAtual?.uf === destaque?.uf && !selecionado;
 
   return (
-    <div className="relative">
-      <div className="relative">
-        <svg
-          viewBox={`0 0 ${BRASIL_VIEWBOX.width} ${BRASIL_VIEWBOX.height}`}
-          xmlns="http://www.w3.org/2000/svg"
-          className="block w-full"
-          role="img"
-          aria-label="Mapa do Brasil colorido por contribuições por milhão de habitantes"
-          onMouseLeave={() => setHover(null)}
-        >
-          {Object.entries(BRASIL_PATHS).map(([uf, info], idx) => {
-            const calc = ufLookup.get(uf);
-            const cor = calc
-              ? corDoEstado(calc.porMilhao, maxPorMilhao, calc.contribuicoes)
-              : "#fef3c7";
-            const ehDestaque = destaque?.uf === uf;
-            const ehHover = hover?.uf === uf;
-            return (
-              <path
-                key={uf}
-                d={info.d}
-                fill={cor}
-                stroke={ehHover || ehDestaque ? "#15803d" : "#65a30d"}
-                strokeWidth={ehHover ? 1.6 : ehDestaque ? 1.4 : 0.8}
-                style={{
-                  transition: "all 250ms ease",
-                  transform: ehHover ? "scale(1.01)" : "scale(1)",
-                  transformOrigin: "center",
-                  transformBox: "fill-box",
-                  opacity: animado ? 1 : 0,
-                  transitionDelay: animado ? `${Math.min(idx * 18, 500)}ms` : "0ms",
-                  cursor: "default",
-                  outline: "none",
-                }}
-                tabIndex={0}
-                onMouseEnter={(e) => {
-                  const rect = e.currentTarget.ownerSVGElement?.getBoundingClientRect();
-                  if (!rect) return setHover({ uf, x: 0, y: 0 });
-                  const bbox = e.currentTarget.getBBox();
-                  const cx = ((bbox.x + bbox.width / 2) / BRASIL_VIEWBOX.width) * rect.width;
-                  const cy = ((bbox.y + bbox.height / 2) / BRASIL_VIEWBOX.height) * rect.height;
-                  setHover({ uf, x: cx, y: cy });
-                }}
-                onFocus={() => setHover({ uf, x: 0, y: 0 })}
-                onBlur={() => setHover(null)}
-                aria-label={
-                  calc
-                    ? `${calc.nome}: ${calc.contribuicoes} ${calc.contribuicoes === 1 ? "contribuição" : "contribuições"}, ${calc.porMilhao.toFixed(2)} por milhão de habitantes`
-                    : info.name
-                }
-              />
-            );
-          })}
-          {destaque && (
-            <DestaqueIndicador
-              path={BRASIL_PATHS[destaque.uf].d}
-              animado={animado}
+    <div>
+      <svg
+        viewBox={`0 0 ${BRASIL_VIEWBOX.width} ${BRASIL_VIEWBOX.height}`}
+        xmlns="http://www.w3.org/2000/svg"
+        className="block w-full"
+        role="img"
+        aria-label="Mapa do Brasil colorido por contribuições por milhão de habitantes"
+      >
+        {Object.entries(BRASIL_PATHS).map(([uf, info], idx) => {
+          const calc = ufLookup.get(uf);
+          const cor = calc
+            ? corDoEstado(calc.porMilhao, maxPorMilhao, calc.contribuicoes)
+            : "#fef3c7";
+          const ehDestaque = destaque?.uf === uf;
+          const ehSelecionado = selecionado === uf;
+          return (
+            <path
+              key={uf}
+              d={info.d}
+              fill={cor}
+              stroke={ehSelecionado || ehDestaque ? "#15803d" : "#65a30d"}
+              strokeWidth={ehSelecionado ? 1.6 : ehDestaque ? 1.4 : 0.8}
+              style={{
+                transition: "all 250ms ease",
+                transform: ehSelecionado ? "scale(1.01)" : "scale(1)",
+                transformOrigin: "center",
+                transformBox: "fill-box",
+                opacity: animado ? 1 : 0,
+                transitionDelay: animado ? `${Math.min(idx * 18, 500)}ms` : "0ms",
+                cursor: "pointer",
+                outline: "none",
+              }}
+              tabIndex={0}
+              onPointerEnter={(e) => {
+                if (e.pointerType === "mouse") setSelecionado(uf);
+              }}
+              onPointerLeave={(e) => {
+                if (e.pointerType === "mouse") setSelecionado(null);
+              }}
+              onClick={() => setSelecionado((prev) => (prev === uf ? null : uf))}
+              onFocus={() => setSelecionado(uf)}
+              onBlur={() => setSelecionado(null)}
+              aria-label={
+                calc
+                  ? `${calc.nome}: ${calc.contribuicoes} ${calc.contribuicoes === 1 ? "contribuição" : "contribuições"}, ${calc.porMilhao.toFixed(2)} por milhão de habitantes`
+                  : info.name
+              }
             />
-          )}
-        </svg>
+          );
+        })}
+        {destaque && (
+          <DestaqueIndicador
+            path={BRASIL_PATHS[destaque.uf].d}
+            animado={animado}
+          />
+        )}
+      </svg>
 
-        {stateAtual && (
-          <div
-            className="pointer-events-none absolute z-10 rounded-md border border-verde-700/40 bg-white/95 px-3 py-2 text-xs shadow-lg backdrop-blur"
-            style={{
-              left: `${(hover!.x / (hover!.y > 0 ? 1 : 1)) }px`,
-              top: `${hover!.y}px`,
-              transform: "translate(-50%, calc(-100% - 8px))",
-              maxWidth: 240,
-            }}
-          >
-            <p className="font-semibold text-verde-900">
+      {/* Painel de detalhes do estado (sempre visível, abaixo do mapa) */}
+      {stateAtual && (
+        <div
+          className={`mt-3 rounded-md border px-3 py-2.5 text-xs ${
+            mostrandoDestaque && stateAtual.contribuicoes === 0
+              ? "border-verde-600/40 bg-verde-50 text-verde-900 motion-safe:animate-pulse"
+              : "border-verde-600/30 bg-white/80 text-verde-900"
+          }`}
+          aria-live="polite"
+        >
+          <div className="flex items-baseline gap-1.5">
+            {mostrandoDestaque && <span aria-hidden>🎯</span>}
+            <p className="font-semibold">
               {stateAtual.nome}
               {stateAtual.ranking !== null && (
-                <span className="ml-1.5 text-verde-700">· {stateAtual.ranking}º</span>
+                <span className="ml-1.5 font-normal text-verde-700">· {stateAtual.ranking}º</span>
               )}
             </p>
-            {stateAtual.contribuicoes === 0 ? (
-              <>
-                <p className="mt-0.5 text-verde-800">Nenhuma contribuição ainda</p>
-                <p className="mt-0.5 font-medium text-verde-700">Seja o primeiro!</p>
-              </>
-            ) : (
-              <>
-                <p className="mt-0.5 text-verde-800">
-                  {stateAtual.contribuicoes}{" "}
-                  {stateAtual.contribuicoes === 1 ? "contribuição" : "contribuições"} ·{" "}
-                  {formatarDuracao(stateAtual.segundos)}
-                </p>
-                <p className="mt-0.5 text-verde-800/70">
-                  {stateAtual.porMilhao.toFixed(2)} por milhão de habitantes
-                </p>
-              </>
-            )}
           </div>
-        )}
-      </div>
+          {stateAtual.contribuicoes === 0 ? (
+            <p className="mt-1 text-verde-800">
+              Nenhuma contribuição ainda.{" "}
+              <span className="font-medium text-verde-700">Seja o primeiro!</span>
+            </p>
+          ) : (
+            <p className="mt-1 text-verde-800">
+              <strong className="font-medium">{stateAtual.contribuicoes}</strong>{" "}
+              {stateAtual.contribuicoes === 1 ? "contribuição" : "contribuições"} ·{" "}
+              <strong className="font-medium">{formatarDuracao(stateAtual.segundos)}</strong>
+              <br />
+              <span className="text-verde-800/70">
+                {stateAtual.porMilhao.toFixed(2)} por milhão de habitantes
+              </span>
+            </p>
+          )}
+        </div>
+      )}
 
-      {/* Destaque + Legenda */}
-      <div className="mt-3 space-y-2.5">
-        {destaque && destaque.contribuicoes === 0 && (
-          <div className="flex items-center gap-2 rounded-md border border-verde-600/40 bg-verde-50 px-3 py-2 text-xs text-verde-900 motion-safe:animate-pulse">
-            <span aria-hidden>🎯</span>
-            <span>
-              <strong className="font-semibold">{destaque.nome}</strong> ainda não tem nenhuma voz.{" "}
-              <span className="text-verde-700">Seja o primeiro!</span>
-            </span>
-          </div>
-        )}
-        {destaque && destaque.contribuicoes > 0 && (
-          <div className="flex items-center gap-2 rounded-md border border-verde-600/40 bg-verde-50 px-3 py-2 text-xs text-verde-900">
-            <span aria-hidden>🎯</span>
-            <span>
-              <strong className="font-semibold">{destaque.nome}</strong> está sub-representado.{" "}
-              <span className="text-verde-700">Sua voz pode mudar isso.</span>
-            </span>
-          </div>
-        )}
-
+      {/* Legenda */}
+      <div className="mt-3 space-y-1.5">
         <div className="flex flex-wrap items-center gap-2 text-[10px] text-verde-800/70">
           <span className="font-medium uppercase tracking-wide">Per capita</span>
           <span className="text-verde-800/40">·</span>
@@ -263,6 +244,9 @@ export default function MapaBrasil() {
           <div className="h-2 flex-1 rounded-sm bg-gradient-to-r from-amarelo-100 via-verde-200 to-verde-700" />
           <span>Topo</span>
         </div>
+        <p className="text-[10px] text-verde-800/60">
+          Toque ou passe o cursor sobre um estado para ver os detalhes.
+        </p>
       </div>
 
       {erro && !stats && (
