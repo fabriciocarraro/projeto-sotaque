@@ -39,8 +39,9 @@ function geraId(): string {
 
 async function invalidarCacheEstatisticas(request: Request): Promise<void> {
   try {
-    const url = new URL("/api/estatisticas", new URL(request.url).origin).toString();
-    await caches.default.delete(new Request(url, { method: "GET" }));
+    const origin = new URL(request.url).origin;
+    await caches.default.delete(new Request(`${origin}/api/estatisticas`, { method: "GET" }));
+    await caches.default.delete(new Request(`${origin}/api/estatisticas-estados`, { method: "GET" }));
   } catch {
     // best effort
   }
