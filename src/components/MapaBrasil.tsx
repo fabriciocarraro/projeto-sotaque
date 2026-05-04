@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BRASIL_PATHS, BRASIL_VIEWBOX } from "../lib/brasil-paths";
 import { ESTADOS } from "../lib/opcoes";
 
@@ -51,11 +51,47 @@ function corDoEstado(porMilhao: number, maxPorMilhao: number, contribs: number):
   return `hsl(${h}deg ${s}% ${l}%)`;
 }
 
+type PopupPos = { uf: string; cx: number; cy: number; below: boolean };
+
 export default function MapaBrasil() {
   const [stats, setStats] = useState<EstadoStat[] | null>(null);
   const [erro, setErro] = useState(false);
-  const [selecionado, setSelecionado] = useState<string | null>(null);
+  const [popup, setPopup] = useState<PopupPos | null>(null);
   const [animado, setAnimado] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  function abrirPopup(uf: string, clientX: number, clientY: number) {
+    const container = containerRef.current;
+    if (!container) {
+      setPopup({ uf, cx: 0, cy: 0, below: true });
+      return;
+    }
+    const rect = container.getBoundingClientRect();
+    let cx = clientX - rect.left;
+    let cy = clientY - rect.top;
+
+    // Clamp horizontal: popup tem ~210px de largura, halfW = 110 pra deixar margem
+    const halfW = 110;
+    cx = Math.max(halfW, Math.min(rect.width - halfW, cx));
+
+    // Se o ponto está perto do topo, abre ABAIXO; senão, ACIMA
+    const margemPopup = 90;
+    const below = cy < margemPopup + 12;
+
+    setPopup({ uf, cx, cy, below });
+  }
+
+  // Fecha popup ao tocar fora do mapa (mobile)
+  useEffect(() => {
+    function onPointerDownOutside(e: PointerEvent) {
+      if (e.pointerType === "mouse") return;
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setPopup(null);
+      }
+    }
+    document.addEventListener("pointerdown", onPointerDownOutside);
+    return () => document.removeEventListener("pointerdown", onPointerDownOutside);
+  }, []);
 
   useEffect(() => {
     let ativo = true;
@@ -131,12 +167,10 @@ export default function MapaBrasil() {
     return m;
   }, [calculados]);
 
-  // Estado mostrado no painel: o selecionado/hovered, ou o destaque por padrão
-  const stateAtual = (selecionado ? ufLookup.get(selecionado) : null) ?? destaque ?? null;
-  const mostrandoDestaque = stateAtual?.uf === destaque?.uf && !selecionado;
+  const popupState = popup ? ufLookup.get(popup.uf) ?? null : null;
 
   return (
-    <div>
+    <div ref={containerRef} className="relative">
       <svg
         viewBox={`0 0 ${BRASIL_VIEWBOX.width} ${BRASIL_VIEWBOX.height}`}
         xmlns="http://www.w3.org/2000/svg"
@@ -150,34 +184,43 @@ export default function MapaBrasil() {
             ? corDoEstado(calc.porMilhao, maxPorMilhao, calc.contribuicoes)
             : "#fef3c7";
           const ehDestaque = destaque?.uf === uf;
-          const ehSelecionado = selecionado === uf;
+          const ehAtivo = popup?.uf === uf;
           return (
             <path
               key={uf}
               d={info.d}
               fill={cor}
-              stroke={ehSelecionado || ehDestaque ? "#15803d" : "#65a30d"}
-              strokeWidth={ehSelecionado ? 1.6 : ehDestaque ? 1.4 : 0.8}
+              stroke={ehAtivo || ehDestaque ? "#15803d" : "#65a30d"}
+              strokeWidth={ehAtivo ? 1.6 : ehDestaque ? 1.4 : 0.8}
               style={{
-                transition: "all 250ms ease",
-                transform: ehSelecionado ? "scale(1.01)" : "scale(1)",
+                transition: "all 200ms ease",
+                transform: ehAtivo ? "scale(1.01)" : "scale(1)",
                 transformOrigin: "center",
                 transformBox: "fill-box",
                 opacity: animado ? 1 : 0,
                 transitionDelay: animado ? `${Math.min(idx * 18, 500)}ms` : "0ms",
                 cursor: "pointer",
                 outline: "none",
+                touchAction: "manipulation",
               }}
-              tabIndex={0}
               onPointerEnter={(e) => {
-                if (e.pointerType === "mouse") setSelecionado(uf);
+                if (e.pointerType === "mouse") abrirPopup(uf, e.clientX, e.clientY);
+              }}
+              onPointerMove={(e) => {
+                if (e.pointerType === "mouse") abrirPopup(uf, e.clientX, e.clientY);
               }}
               onPointerLeave={(e) => {
-                if (e.pointerType === "mouse") setSelecionado(null);
+                if (e.pointerType === "mouse") setPopup(null);
               }}
-              onClick={() => setSelecionado((prev) => (prev === uf ? null : uf))}
-              onFocus={() => setSelecionado(uf)}
-              onBlur={() => setSelecionado(null)}
+              onPointerDown={(e) => {
+                if (e.pointerType !== "mouse") {
+                  if (popup?.uf === uf) {
+                    setPopup(null);
+                  } else {
+                    abrirPopup(uf, e.clientX, e.clientY);
+                  }
+                }
+              }}
               aria-label={
                 calc
                   ? `${calc.nome}: ${calc.contribuicoes} ${calc.contribuicoes === 1 ? "contribuição" : "contribuições"}, ${calc.porMilhao.toFixed(2)} por milhão de habitantes`
@@ -194,41 +237,66 @@ export default function MapaBrasil() {
         )}
       </svg>
 
-      {/* Painel de detalhes do estado (sempre visível, abaixo do mapa) */}
-      {stateAtual && (
+      {/* Popup flutuante posicionado pelo cursor/dedo */}
+      {popup && popupState && (
         <div
-          className={`mt-3 rounded-md border px-3 py-2.5 text-xs ${
-            mostrandoDestaque && stateAtual.contribuicoes === 0
-              ? "border-verde-600/40 bg-verde-50 text-verde-900 motion-safe:animate-pulse"
-              : "border-verde-600/30 bg-white/80 text-verde-900"
-          }`}
-          aria-live="polite"
+          className="pointer-events-none absolute z-20 w-[210px] rounded-md border border-verde-700/40 bg-white px-3 py-2 text-xs shadow-lg"
+          style={{
+            left: `${popup.cx}px`,
+            top: `${popup.cy}px`,
+            transform: popup.below
+              ? "translate(-50%, 14px)"
+              : "translate(-50%, calc(-100% - 14px))",
+          }}
+          role="tooltip"
         >
-          <div className="flex items-baseline gap-1.5">
-            {mostrandoDestaque && <span aria-hidden>🎯</span>}
-            <p className="font-semibold">
-              {stateAtual.nome}
-              {stateAtual.ranking !== null && (
-                <span className="ml-1.5 font-normal text-verde-700">· {stateAtual.ranking}º</span>
-              )}
-            </p>
-          </div>
-          {stateAtual.contribuicoes === 0 ? (
-            <p className="mt-1 text-verde-800">
-              Nenhuma contribuição ainda.{" "}
-              <span className="font-medium text-verde-700">Seja o primeiro!</span>
-            </p>
+          <p className="font-semibold text-verde-900">
+            {popupState.nome}
+            {popupState.ranking !== null && (
+              <span className="ml-1.5 font-normal text-verde-700">· {popupState.ranking}º</span>
+            )}
+          </p>
+          {popupState.contribuicoes === 0 ? (
+            <>
+              <p className="mt-0.5 text-verde-800">Nenhuma contribuição ainda</p>
+              <p className="mt-0.5 font-medium text-verde-700">Seja o primeiro!</p>
+            </>
           ) : (
-            <p className="mt-1 text-verde-800">
-              <strong className="font-medium">{stateAtual.contribuicoes}</strong>{" "}
-              {stateAtual.contribuicoes === 1 ? "contribuição" : "contribuições"} ·{" "}
-              <strong className="font-medium">{formatarDuracao(stateAtual.segundos)}</strong>
-              <br />
-              <span className="text-verde-800/70">
-                {stateAtual.porMilhao.toFixed(2)} por milhão de habitantes
-              </span>
-            </p>
+            <>
+              <p className="mt-0.5 text-verde-800">
+                {popupState.contribuicoes}{" "}
+                {popupState.contribuicoes === 1 ? "contribuição" : "contribuições"} ·{" "}
+                {formatarDuracao(popupState.segundos)}
+              </p>
+              <p className="mt-0.5 text-verde-800/70">
+                {popupState.porMilhao.toFixed(2)} por milhão de hab.
+              </p>
+            </>
           )}
+        </div>
+      )}
+
+      {/* Callout do destaque (sempre visível abaixo do mapa) */}
+      {destaque && (
+        <div
+          className={`mt-3 flex items-center gap-2 rounded-md border border-verde-600/40 bg-verde-50 px-3 py-2 text-xs text-verde-900 ${
+            destaque.contribuicoes === 0 ? "motion-safe:animate-pulse" : ""
+          }`}
+        >
+          <span aria-hidden>🎯</span>
+          <span>
+            {destaque.contribuicoes === 0 ? (
+              <>
+                <strong className="font-semibold">{destaque.nome}</strong> ainda não tem nenhuma
+                voz. <span className="text-verde-700">Seja o primeiro!</span>
+              </>
+            ) : (
+              <>
+                <strong className="font-semibold">{destaque.nome}</strong> está sub-representado.{" "}
+                <span className="text-verde-700">Sua voz pode mudar isso.</span>
+              </>
+            )}
+          </span>
         </div>
       )}
 
@@ -245,7 +313,7 @@ export default function MapaBrasil() {
           <span>Topo</span>
         </div>
         <p className="text-[10px] text-verde-800/60">
-          Toque ou passe o cursor sobre um estado para ver os detalhes.
+          Toque num estado para ver os detalhes (ou passe o cursor no desktop).
         </p>
       </div>
 
