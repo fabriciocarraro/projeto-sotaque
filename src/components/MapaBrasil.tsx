@@ -170,7 +170,15 @@ export default function MapaBrasil() {
   const popupState = popup ? ufLookup.get(popup.uf) ?? null : null;
 
   return (
-    <div ref={containerRef} className="relative">
+    <div
+      ref={containerRef}
+      className="relative"
+      onPointerDown={(e) => {
+        // Tap dentro do container mas fora de qualquer estado: fecha o popup.
+        // (Os paths usam stopPropagation para evitar disparar isso.)
+        if (e.pointerType !== "mouse") setPopup(null);
+      }}
+    >
       <svg
         viewBox={`0 0 ${BRASIL_VIEWBOX.width} ${BRASIL_VIEWBOX.height}`}
         xmlns="http://www.w3.org/2000/svg"
@@ -214,6 +222,8 @@ export default function MapaBrasil() {
               }}
               onPointerDown={(e) => {
                 if (e.pointerType !== "mouse") {
+                  // Evita o handler do container fechar o popup
+                  e.stopPropagation();
                   if (popup?.uf === uf) {
                     setPopup(null);
                   } else {
