@@ -1,12 +1,9 @@
 import { z } from "zod";
 import {
-  AMBIENTES,
-  DISPOSITIVOS,
   ESCOLARIDADES,
   ESTADOS,
   FAIXAS_ETARIAS,
   GENEROS,
-  MICROFONES,
   REGIOES,
   SOTAQUES,
   valoresDe,
@@ -42,14 +39,6 @@ export const submissaoSchema = z.object({
   faixa_etaria: z.enum(valoresDe(FAIXAS_ETARIAS)),
   genero: z.enum(valoresDe(GENEROS), { errorMap: () => ({ message: "Selecione uma opção." }) }),
   escolaridade: z.enum(valoresDe(ESCOLARIDADES), { errorMap: () => ({ message: "Selecione uma opção." }) }),
-
-  tipo_dispositivo: z.preprocess(vazioParaUndefined, z.enum(valoresDe(DISPOSITIVOS)).optional()),
-  tipo_microfone: z.preprocess(vazioParaUndefined, z.enum(valoresDe(MICROFONES)).optional()),
-  ambiente_gravacao: z.preprocess(vazioParaUndefined, z.enum(valoresDe(AMBIENTES)).optional()),
-  autoavaliacao_qualidade: z.preprocess(
-    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
-    z.number().int().min(1).max(5).optional(),
-  ),
 
   audio_duracao_segundos: z.preprocess(
     (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),

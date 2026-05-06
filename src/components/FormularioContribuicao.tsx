@@ -2,17 +2,13 @@ import { useEffect, useMemo, useState, useRef, type FormEvent } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import GravadorAudio from "./GravadorAudio";
 import {
-  AMBIENTES,
   AUDIO_TAMANHO_MAX,
-  DISPOSITIVOS,
   ESCOLARIDADES,
   ESTADOS,
   EXTENSOES_PERMITIDAS,
   FAIXAS_ETARIAS,
   GENEROS,
-  MICROFONES,
   MIMETYPES_PERMITIDOS,
-  QUALIDADE,
   REGIOES,
   REGIOES_SOTAQUE_LABEL,
   SOTAQUES,
@@ -85,9 +81,6 @@ type DadosSalvos = {
   faixaEtaria?: string;
   genero?: string;
   escolaridade?: string;
-  dispositivo?: string;
-  microfone?: string;
-  ambiente?: string;
   numFalantes?: number;
   sotaquesFalantes?: string[];
   escolaridadesFalantes?: string[];
@@ -156,11 +149,6 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
   const [genero, setGenero] = useState("");
   const [escolaridade, setEscolaridade] = useState("");
 
-  const [dispositivo, setDispositivo] = useState("");
-  const [microfone, setMicrofone] = useState("");
-  const [ambiente, setAmbiente] = useState("");
-  const [qualidade, setQualidade] = useState("");
-
   const [numFalantes, setNumFalantes] = useState(1);
   const [sotaquesFalantes, setSotaquesFalantes] = useState<string[]>(["", "", "", ""]);
   const [escolaridadesFalantes, setEscolaridadesFalantes] = useState<string[]>(["", "", "", ""]);
@@ -198,9 +186,6 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
       if (d.faixaEtaria) setFaixaEtaria(d.faixaEtaria);
       if (d.genero) setGenero(d.genero);
       if (d.escolaridade) setEscolaridade(d.escolaridade);
-      if (d.dispositivo) setDispositivo(d.dispositivo);
-      if (d.microfone) setMicrofone(d.microfone);
-      if (d.ambiente) setAmbiente(d.ambiente);
       if (typeof d.numFalantes === "number") setNumFalantes(d.numFalantes);
       if (Array.isArray(d.sotaquesFalantes)) {
         setSotaquesFalantes(d.sotaquesFalantes.map((s) => (sotaquesValidos.has(s) ? s : "")));
@@ -356,10 +341,6 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
       faixa_etaria: faixaEtaria,
       genero: genero,
       escolaridade: escolaridade,
-      tipo_dispositivo: dispositivo || undefined,
-      tipo_microfone: microfone || undefined,
-      ambiente_gravacao: ambiente || undefined,
-      autoavaliacao_qualidade: qualidade ? Number(qualidade) : undefined,
       falantes: [
         { sotaque: sotaque || undefined, escolaridade: escolaridade || undefined },
         ...sotaquesFalantes.slice(0, numFalantes - 1).map((s, i) => ({
@@ -455,9 +436,6 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
             faixaEtaria,
             genero,
             escolaridade,
-            dispositivo,
-            microfone,
-            ambiente,
             numFalantes,
             sotaquesFalantes,
             escolaridadesFalantes,
@@ -735,93 +713,10 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
         </Campo>
       </section>
 
-      {/* Seção 4 */}
+      {/* Seção 4 — falantes */}
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
-          <h2 className="text-lg font-semibold text-verde-900">4. Sobre a gravação</h2>
-          <p className="mt-1 text-sm text-verde-800">
-            Campos opcionais que nos ajudam a entender a diversidade de equipamentos e ambientes.
-          </p>
-        </div>
-
-        <Campo id="dispositivo" rotulo="Tipo de dispositivo" erro={erros["tipo_dispositivo"]}>
-          <select
-            id="dispositivo"
-            value={dispositivo}
-            onChange={(e) => setDispositivo(e.target.value)}
-            className={inputClasse(!!erros["tipo_dispositivo"])}
-          >
-            <option value="">—</option>
-            {DISPOSITIVOS.map((d) => (
-              <option key={d.valor} value={d.valor}>{d.rotulo}</option>
-            ))}
-          </select>
-        </Campo>
-
-        <Campo id="microfone" rotulo="Tipo de microfone" erro={erros["tipo_microfone"]}>
-          <select
-            id="microfone"
-            value={microfone}
-            onChange={(e) => setMicrofone(e.target.value)}
-            className={inputClasse(!!erros["tipo_microfone"])}
-          >
-            <option value="">—</option>
-            {MICROFONES.map((m) => (
-              <option key={m.valor} value={m.valor}>{m.rotulo}</option>
-            ))}
-          </select>
-        </Campo>
-
-        <Campo id="ambiente" rotulo="Ambiente de gravação" erro={erros["ambiente_gravacao"]}>
-          <select
-            id="ambiente"
-            value={ambiente}
-            onChange={(e) => setAmbiente(e.target.value)}
-            className={inputClasse(!!erros["ambiente_gravacao"])}
-          >
-            <option value="">—</option>
-            {AMBIENTES.map((a) => (
-              <option key={a.valor} value={a.valor}>{a.rotulo}</option>
-            ))}
-          </select>
-        </Campo>
-
-        <Campo
-          id="qualidade"
-          rotulo="Autoavaliação de qualidade do áudio"
-          ajuda="1 = ruim · 5 = excelente."
-          erro={erros["autoavaliacao_qualidade"]}
-        >
-          <div className="flex items-center gap-3" role="radiogroup" aria-label="Autoavaliação de qualidade">
-            {QUALIDADE.map((n) => (
-              <label key={n} className="flex cursor-pointer items-center gap-1 rounded-md border border-stone-300 bg-white px-3 py-1.5 text-sm has-[:checked]:border-verde-600 has-[:checked]:bg-verde-50">
-                <input
-                  type="radio"
-                  name="qualidade"
-                  value={n}
-                  checked={qualidade === String(n)}
-                  onChange={(e) => setQualidade(e.target.value)}
-                  className="accent-verde-600"
-                />
-                <span>{n}</span>
-              </label>
-            ))}
-            {qualidade && (
-              <button
-                type="button"
-                onClick={() => setQualidade("")}
-                className="text-xs text-verde-800/80 underline hover:text-verde-900">
-                limpar
-              </button>
-            )}
-          </div>
-        </Campo>
-      </section>
-
-      {/* Seção 5 — falantes */}
-      <section className="space-y-4 border-b border-stone-200 pb-8">
-        <div>
-          <h2 className="text-lg font-semibold text-verde-900">5. Falantes na gravação</h2>
+          <h2 className="text-lg font-semibold text-verde-900">4. Falantes na gravação</h2>
           <p className="mt-1 text-sm text-verde-800">
             Se a gravação tiver mais de uma pessoa (podcast, reunião, conversa), informe quantos falantes participam.
           </p>
@@ -907,10 +802,10 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
         )}
       </section>
 
-      {/* Seção 6 */}
+      {/* Seção 5 — arquivo */}
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
-          <h2 className="text-lg font-semibold text-verde-900">6. Arquivo(s) de áudio</h2>
+          <h2 className="text-lg font-semibold text-verde-900">5. Arquivo(s) de áudio</h2>
           <p className="mt-1 text-sm text-verde-800">
             Grave direto pelo navegador ou envie até {BATCH_MAX} arquivos existentes (cada um até {formatarTamanho(AUDIO_TAMANHO_MAX)}).
           </p>
@@ -1013,9 +908,10 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
               Atenção: dados do formulário aplicados a todos os {arquivos.length} áudios
             </p>
             <p className="mt-1 text-verde-800">
-              O sotaque, equipamento, ambiente, qualidade e demais campos serão registrados igual em
-              todos os áudios deste envio. <strong>Se variarem entre os áudios</strong> (ex: um foi
-              gravado no celular e outro no microfone USB), envie cada um em uma submissão separada.
+              O sotaque, região, faixa etária e demais campos do formulário serão registrados
+              iguais para todos os áudios deste envio. <strong>Se houver variação relevante entre os
+              áudios</strong> (por exemplo, falantes diferentes), envie cada um em uma submissão
+              separada.
             </p>
           </div>
         )}
@@ -1058,10 +954,10 @@ export default function FormularioContribuicao({ turnstileSiteKey, children }: P
         {erroArquivo && <p className="text-sm text-red-600">{erroArquivo}</p>}
       </section>
 
-      {/* Seção 7 — consentimentos */}
+      {/* Seção 6 — consentimentos */}
       <section className="space-y-4 border-b border-stone-200 pb-8">
         <div>
-          <h2 className="text-lg font-semibold text-verde-900">7. Consentimento</h2>
+          <h2 className="text-lg font-semibold text-verde-900">6. Consentimento</h2>
           <p className="mt-1 text-sm text-verde-800">
             Leia o{" "}
             <a href="/termo" className="font-medium text-verde-700 underline decoration-verde-600/40 underline-offset-2 hover:text-verde-800" target="_blank" rel="noopener">

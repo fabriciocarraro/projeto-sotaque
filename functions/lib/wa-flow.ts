@@ -264,11 +264,11 @@ async function persistirContribuicao(
   const stmtSubmission = env.DB.prepare(
     `INSERT INTO submissions (
       id, pseudonimo, sotaque_declarado, regiao_socializacao, estado_principal,
-      cidade_microrregiao, faixa_etaria, genero, escolaridade, tipo_dispositivo, tipo_microfone,
-      ambiente_gravacao, autoavaliacao_qualidade, audio_key, audio_hash, audio_tamanho,
+      cidade_microrregiao, faixa_etaria, genero, escolaridade,
+      audio_key, audio_hash, audio_tamanho,
       audio_mimetype, audio_nome_original, audio_duracao_segundos, num_falantes,
       transcricao, transcricao_status, asr_request_id, transcricao_provider, status_moderacao, criado_em, source
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'celular', NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, 1, NULL, 'pendente', NULL, 'elevenlabs', 'pendente', ?, 'whatsapp')`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NULL, 'pendente', NULL, 'elevenlabs', 'pendente', ?, 'whatsapp')`,
   ).bind(
     id,
     m.pseudonimo!,

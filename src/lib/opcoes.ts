@@ -141,38 +141,11 @@ export const GENEROS = [
   { valor: "outro", rotulo: "Outro" },
 ] as const;
 
-export const DISPOSITIVOS = [
-  { valor: "celular", rotulo: "Celular" },
-  { valor: "computador", rotulo: "Computador / notebook" },
-  { valor: "tablet", rotulo: "Tablet" },
-  { valor: "gravador", rotulo: "Gravador dedicado" },
-  { valor: "outro", rotulo: "Outro" },
-] as const;
-
-export const MICROFONES = [
-  { valor: "embutido", rotulo: "Microfone embutido do dispositivo" },
-  { valor: "headset", rotulo: "Fone com microfone / headset" },
-  { valor: "usb", rotulo: "Microfone USB externo" },
-  { valor: "condensador", rotulo: "Microfone condensador / estúdio" },
-  { valor: "lapela", rotulo: "Lapela" },
-  { valor: "outro", rotulo: "Outro" },
-  { valor: "nao-sei", rotulo: "Não sei" },
-] as const;
-
-export const AMBIENTES = [
-  { valor: "silencioso", rotulo: "Silencioso (sem ruído perceptível)" },
-  { valor: "ruido-leve", rotulo: "Ruído leve (leve fundo)" },
-  { valor: "ruido-moderado", rotulo: "Ruído moderado" },
-  { valor: "ruido-alto", rotulo: "Ruído alto" },
-] as const;
-
 export const ESCOLARIDADES = [
   { valor: "fundamental-1", rotulo: "Ensino Fundamental I (até 5º ano)" },
   { valor: "fundamental-2-medio", rotulo: "Ensino Fundamental II / Ensino Médio" },
   { valor: "superior", rotulo: "Ensino Superior (completo ou incompleto)" },
 ] as const;
-
-export const QUALIDADE = [1, 2, 3, 4, 5] as const;
 
 export const MIMETYPES_PERMITIDOS = [
   "audio/wav",
